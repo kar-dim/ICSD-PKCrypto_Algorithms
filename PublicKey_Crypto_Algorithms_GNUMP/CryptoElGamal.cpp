@@ -13,10 +13,11 @@ void CryptoElGamal::init() {
 }
 
 void CryptoElGamal::initialize_parameters() {
-    //πρώτα βρίσκουμε έναν prime 200bits
+    //πρώτα βρίσκουμε έναν prime 2048 bits
     //δίνουμε random τιμή και ελέγχουμε αν είναι prime
     while (true) {
         //δημιουργία του p
+        //ΣΗΜΕΙΩΣΗ: η ασκηση ζηταει 200bits αλλα ετσι δεν θα μπορουν να (απο)κρυπτογραφηθουν μεγαλα κειμενα, ενα πιο λογικο μεγεθος θα ηταν 2048 bits
         mpz_urandomb(p, state, 200);
         //έλεγχος αν είναι prime, αν είναι τότε break
         if (mpz_probab_prime_p(p, 30) >= 1) {
@@ -37,12 +38,11 @@ void CryptoElGamal::initialize_parameters() {
 
     //τώρα χρειαζόμαστε και το a (το οποίο είναι ο εκθέτης στο g^a mod p το οποίο είναι το public key)
     //το α ειναι απλως ενας τυχαιος στο διαστημα [0,p-2], πρέπει να ελέγχουμε αν όντως είναι σε αυτό το διάστημα επαναληπτικά
-    //(τυπικά σχεδόν ποτέ δε θα γίνει loop πάνω από 1 φορά , σπάνιο να ισχύει a=p ή a=p-1 αλλά για να είμαστε σίγουροι το βάζουμε)
     mpz_t p_minus_two;
     mpz_init(p_minus_two);
     mpz_sub_ui(p_minus_two, p, 2); //p-2
     while (true) {
-        mpz_urandomb(a, state, 200);
+        mpz_urandomb(a, state, 200); //αντιστοιχα με το p, ισως πιο λογικο τα 2048 bits
         //έλεγχος αν a<=p-2
         //αν ναι τοτε break
         if (mpz_cmp(a, p_minus_two) <= 0) {
@@ -114,7 +114,7 @@ void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
 
 void CryptoElGamal::decrypt(mpz_t c1, mpz_t c2, mpz_t plaintext) {
     // πρώτα υπολογίζεται το ενδιάμεσο intermediate = c1 ^ (p - 1 - private_key) mod p
-    //στη συνέχεια υαποκρυπτογραφείται ως intermediate * c2 mod p
+    //στη συνέχεια αποκρυπτογραφείται ως intermediate * c2 mod p
     mpz_t intermediate, exponential, temp;
     mpz_init(intermediate);
     mpz_init(exponential);

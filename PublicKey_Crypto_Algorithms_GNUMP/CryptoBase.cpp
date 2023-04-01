@@ -59,14 +59,14 @@ bool CryptoBase::english_to_decimal(mpz_t number, const std::string &word) {
         int temp = (int)word[i];
         //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
         if (CryptoBase::number_of_digits(temp) == 2) {
-            characters_as_numbers.push_back('0');
-            characters_as_numbers.push_back(get_digit(temp, 1) + '0');
-            characters_as_numbers.push_back(get_digit(temp, 0) + '0');
+            characters_as_numbers += '0';
+            characters_as_numbers += (get_digit(temp, 1) + '0');
+            characters_as_numbers += (get_digit(temp, 0) + '0');
         }
         else if (number_of_digits(temp) == 3) {
-            characters_as_numbers.push_back(get_digit(temp, 2) + '0');
-            characters_as_numbers.push_back(get_digit(temp, 1) + '0');
-            characters_as_numbers.push_back(get_digit(temp, 0) + '0');
+            characters_as_numbers += (get_digit(temp, 2) + '0');
+            characters_as_numbers += (get_digit(temp, 1) + '0');
+            characters_as_numbers += (get_digit(temp, 0) + '0');
         }
         else {
             cout << "Not an English word, can't encrypt it!\n";
