@@ -13,7 +13,7 @@ void CryptoElGamal::init() {
 }
 
 void CryptoElGamal::initialize_parameters() {
-    //πρώτα βρίσκουμε έναν prime 2048 bits
+    //πρώτα βρίσκουμε έναν prime 200 bits
     //δίνουμε random τιμή και ελέγχουμε αν είναι prime
     while (true) {
         //δημιουργία του p
