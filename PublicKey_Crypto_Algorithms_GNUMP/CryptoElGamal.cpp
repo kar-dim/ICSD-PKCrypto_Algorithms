@@ -1,5 +1,8 @@
 ﻿#include "CryptoElGamal.h"
 #include <gmp.h>
+#include <iostream>
+
+using std::cout;
 
 void CryptoElGamal::init() {
 	CryptoBase::init();
@@ -53,18 +56,18 @@ void CryptoElGamal::initialize_parameters() {
 }
 
 void CryptoElGamal::print_parameters() {
-    printf("p = ");
+    cout << "p = ";
     mpz_out_str(NULL, 10, p);
-    printf("\n\n");
-    printf("g = ");
+    cout << "\n\n";
+    cout << "g = ";
     mpz_out_str(NULL, 10, g);
-    printf("\n\n");
-    printf("Public key = ");
+    cout << "\n\n";
+    cout << "Public key = ";
     mpz_out_str(NULL, 10, public_key);
-    printf("\n\n");
-    printf("Private key = ");
+    cout << "\n\n";
+    cout << "Private key = ";
     mpz_out_str(NULL, 10, a);
-    printf("\n\n");
+    cout << "\n\n";
 }
 
 void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {

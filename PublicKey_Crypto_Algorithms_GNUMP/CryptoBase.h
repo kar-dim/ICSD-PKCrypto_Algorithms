@@ -2,6 +2,7 @@
 
 #include<gmp.h>
 #include <time.h>
+#include <string>
 
 class CryptoBase
 {
@@ -17,7 +18,7 @@ public:
     virtual void init();
 	virtual void initialize_parameters() = 0;
 	virtual void print_parameters() = 0;
-	virtual bool english_to_decimal(mpz_t number, const char* word);
-	void decimal_to_english(mpz_t number, char** final_chars, int max_bits);
+	virtual bool english_to_decimal(mpz_t number, const std::string& word);
+	void decimal_to_english(mpz_t number, std::string& final_chars, int max_bits);
 };
 

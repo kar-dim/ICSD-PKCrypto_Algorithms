@@ -1,4 +1,9 @@
 ﻿#include "CryptoRabin.h"
+#include <string>
+#include <gmp.h>
+#include <iostream>
+
+using std::cout;
 
 void CryptoRabin::init() {
 	CryptoBase::init();
@@ -39,56 +44,51 @@ void CryptoRabin::initialize_parameters() {
 }
 
 void CryptoRabin::print_parameters() {
-    printf("p = ");
+    cout << "p = ";
     mpz_out_str(NULL, 10, p);
-    printf("\n\n");
-    printf("q = ");
+    cout << "\n\n";
+    cout << "q = ";
     mpz_out_str(NULL, 10, q);
-    printf("\n\n");
-    printf("n = ");
+    cout << "\n\n";
+    cout << "n = ";
     mpz_out_str(NULL, 10, n);
-    printf("\n\n");
+    cout << "\n\n";
 }
 
-bool CryptoRabin::english_to_decimal(mpz_t number, const char* word) {
-    int size = (int)strlen(word);
-    char* characters_as_numbers = new char[(size * 3) + 12 + 1]; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
+bool CryptoRabin::english_to_decimal(mpz_t number, const std::string &word) {
+    int size = (int)word.length();
+    std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
     int i;
     for (i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
         int temp = (int)word[i];
         //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
         if (number_of_digits(temp) == 2) {
-            characters_as_numbers[(i * 3)] = '0';
-            characters_as_numbers[(i * 3) + 1] = get_digit(temp, 1) + '0';
-            characters_as_numbers[(i * 3) + 2] = get_digit(temp, 0) + '0';
+            characters_as_numbers += '0';
+            characters_as_numbers += (get_digit(temp, 1) + '0');
+            characters_as_numbers += (get_digit(temp, 0) + '0');
         }
         else if (number_of_digits(temp) == 3) {
-            characters_as_numbers[(i * 3)] = get_digit(temp, 2) + '0';
-            characters_as_numbers[(i * 3) + 1] = get_digit(temp, 1) + '0';
-            characters_as_numbers[(i * 3) + 2] = get_digit(temp, 0) + '0';
+            characters_as_numbers += (get_digit(temp, 2) + '0');
+            characters_as_numbers += (get_digit(temp, 1) + '0');
+            characters_as_numbers += (get_digit(temp, 0) + '0');
         }
         else {
-            printf("Not an English word, can't encrypt it!\n");
-            delete[] characters_as_numbers;
+            cout << "Not an English word, can't encrypt it!\n";
             return false;
         }
     }
     //γέμισμα με δώδεκα άσους
-    for (i = (size * 3); i < (size * 3) + 12; i++)
-        characters_as_numbers[i] = 1 + '0';
-    characters_as_numbers[(size * 3) + 12] = '\0';
-    printf("Encoded characters (plus redundancy): %s\n\n", characters_as_numbers);
+    characters_as_numbers += "111111111111";
+    cout << "Encoded characters (plus redundancy): " << characters_as_numbers << "\n\n";
     //τώρα ο πίνακας characters_as_numbers περιέχει τους χαρακτήρες. Άρα για word='rsa' -> 114115097 οπότε αυτός ο αριθμός
     //είναι που θα γίνει (στη συνέχεια) η κρυπτογράφηση, οπότε τον αποθηκεύουμε με το GNUMP
-    if (mpz_set_str(number, characters_as_numbers, 10) == -1) {
-        printf("Failed to encode the word! Can't encrypt\n");
-        delete[] characters_as_numbers;
+    if (mpz_set_str(number, characters_as_numbers.c_str(), 10) == -1) {
+        cout << "Failed to encode the word! Can't encrypt\n";
         return false;
     }
     //αν δεν έχουμε φύγει από τη συνάρτηση σημαίνει πως όλα πήγαν καλά
     //οπότε ο mpz_t number έχει τη τιμή που θέλουμε
-    delete[] characters_as_numbers;
     return true;
 }
 
@@ -250,25 +250,20 @@ void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, 
 
 bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t my_mod_n, mpz_t correct_plaintext) {
     //ελέγχεται ένα-ένα αν έχει το redundancy που θέλουμε (δηλαδή 12 άσους στο τέλος)
-    char* x_chars, * y_chars, * mx_chars, * my_chars;
     //200*200bits max =400 bits οπότε ας έχουμε 400 buffer size
-    x_chars = new char[400]; 
-    y_chars = new char[400];
-    mx_chars = new char[400];
-    my_chars = new char[400];
+    std::unique_ptr<char[]>x_chars(new char[400]);
+    std::unique_ptr<char[]>y_chars(new char[400]);
+    std::unique_ptr<char[]>mx_chars(new char[400]);
+    std::unique_ptr<char[]>my_chars(new char[400]);
     //κάνουμε "dump" στους buffer arrays τους αριθμούς, κρατώντας και το πλήθος των ψηφίων που διαβάστηκαν
     //θα μας είναι χρήσιμο στο συνέχεια
-    int size_x = gmp_sprintf(x_chars, "%Zd", x);
-    int size_y = gmp_sprintf(y_chars, "%Zd", y);
-    int size_mx = gmp_sprintf(mx_chars, "%Zd", mx_mod_n);
-    int size_my = gmp_sprintf(my_chars, "%Zd", my_mod_n);
+    int size_x = gmp_sprintf(x_chars.get(), "%Zd", x);
+    int size_y = gmp_sprintf(y_chars.get(), "%Zd", y);
+    int size_mx = gmp_sprintf(mx_chars.get(), "%Zd", mx_mod_n);
+    int size_my = gmp_sprintf(my_chars.get(), "%Zd", my_mod_n);
     //αν κάποιο δε διαβάστηκε σωστά τότε οι παραμέτροι είναι λάθος
     if (size_x < 0 || size_y < 0 || size_mx < 0 || size_my < 0) {
-        printf("Could not read some or all of the possible plaintexts!\n\n");
-        delete[] x_chars;
-        delete[] y_chars;
-        delete[] mx_chars;
-        delete[] my_chars;
+        cout << "Could not read some or all of the possible plaintexts!\n\n";
         return false;
     }
 
@@ -306,56 +301,34 @@ bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t 
     }
     //πρέπει μόνο ένα boolean να είναι true, αν δε βρέθηκε κανένα τότε δεν έχουμε σωστούς παραμέτρους
     if (is_x == false && is_y == false && is_mx == false && is_my == false) {
-        printf("Wrong parameters! None of the four plaintexts are correct\n\n");
-        delete[] x_chars;
-        delete[] y_chars;
-        delete[] mx_chars;
-        delete[] my_chars;
+        cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
         return false;
     }
     //απλώς αφαιρούμε τα 12 τελευταία ψηφία και αποθηκέυουμε τον αριθμό στο correct_plaintext
-    char* buf;
+    std::string buf;
     if (is_x) {
-        buf = new char[size_x - 12 + 1];
-        for (i = 0; i < size_x - 12; i++) {
-            buf[i] = x_chars[i];
-        }
-        buf[size_x - 12] = '\0';
+        for (i = 0; i < size_x - 12; i++)
+            buf += x_chars[i];
         //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
-        gmp_sscanf(buf, "%Zd", correct_plaintext);
+        gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_y) {
-        buf = new char[size_y - 12 + 1];
-        for (i = 0; i < size_y - 12; i++) {
-            buf[i] = y_chars[i];
-        }
-        buf[size_y - 12] = '\0';
+        for (i = 0; i < size_y - 12; i++)
+            buf += y_chars[i];
         //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
-        gmp_sscanf(buf, "%Zd", correct_plaintext);
+        gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_mx) {
-        buf = new char[size_mx - 12 + 1];
-        for (i = 0; i < size_mx - 12; i++) {
-            buf[i] = mx_chars[i];
-        }
-        buf[size_mx - 12] = '\0';
+        for (i = 0; i < size_mx - 12; i++)
+            buf += mx_chars[i];
         //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
-        gmp_sscanf(buf, "%Zd", correct_plaintext);
+        gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_my) {
-        buf = new char[size_mx - 12 + 1];
-        for (i = 0; i < size_my - 12; i++) {
-            buf[i] = my_chars[i];
-        }
-        buf[size_my - 12] = '\0';
+        for (i = 0; i < size_my - 12; i++)
+            buf += my_chars[i];
         //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
-        gmp_sscanf(buf, "%Zd", correct_plaintext);
+        gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
-    //free τον χώρο που δεσμεύτηκε
-    delete[] x_chars;
-    delete[] y_chars;
-    delete[] mx_chars;
-    delete[] my_chars;
-    delete[] buf;
     return true;
 }

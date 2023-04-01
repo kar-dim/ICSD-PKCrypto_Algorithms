@@ -1,5 +1,8 @@
 ﻿#include "CryptoRSA.h"
 #include <gmp.h>
+#include <iostream>
+
+using std::cout;
 
 void CryptoRSA::init() {
     CryptoBase::init();
@@ -14,19 +17,19 @@ void CryptoRSA::init() {
 }
 
 void CryptoRSA::print_parameters() {
-    printf("p = ");
+    cout << "p = ";
     mpz_out_str(NULL, 10, p);
-    printf("\n\n");
-    printf("q = ");
+    cout << "\n\n";
+    cout << "q = ";
     mpz_out_str(NULL, 10, q);
-    printf("\n\n");
-    printf("n = ");
+    cout << "\n\n";
+    cout << "n = ";
     mpz_out_str(NULL, 10, n);
-    printf("\n\n");
-    printf("phi = ");
+    cout << "\n\n";
+    cout << "phi = ";
     mpz_out_str(NULL, 10, totient);
-    printf("\n\n");
-    printf("Public key is n and e = 65537\n\n");
+    cout << "\n\n";
+    cout << "Public key is n and e = 65537\n\n";
 }
 
 void CryptoRSA::print_private_key() {
