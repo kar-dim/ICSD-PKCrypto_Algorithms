@@ -84,6 +84,7 @@ bool CryptoRabin::english_to_decimal(mpz_t number, const std::string &word) {
     cout << "Encoded characters (plus redundancy): " << characters_as_numbers << "\n\n";
     //τώρα ο πίνακας characters_as_numbers περιέχει τους χαρακτήρες. Άρα για word='rsa' -> 114115097 οπότε αυτός ο αριθμός
     //είναι που θα γίνει (στη συνέχεια) η κρυπτογράφηση, οπότε τον αποθηκεύουμε με το GNUMP
+    mpz_init(number);
     if (mpz_set_str(number, characters_as_numbers.c_str(), 10) == -1) {
         cout << "Failed to encode the word! Can't encrypt\n";
         return false;
@@ -94,6 +95,7 @@ bool CryptoRabin::english_to_decimal(mpz_t number, const std::string &word) {
 }
 
 void CryptoRabin::encrypt(mpz_t plaintext, mpz_t ciphertext) {
+    mpz_init(ciphertext);
     mpz_powm_ui(ciphertext, plaintext, 2, n);
 }
 
@@ -175,6 +177,9 @@ void CryptoRabin::euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d) {
 }
 
 void CryptoRabin::e_euclid(mpz_t a, mpz_t b, mpz_t gcd_a_b) {
+    mpz_init(a);
+    mpz_init(b);
+    mpz_init(gcd_a_b);
     mpz_cmp(p, q) > 1 ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
 }
 
@@ -186,6 +191,10 @@ void CryptoRabin::e_euclid(mpz_t a, mpz_t b, mpz_t gcd_a_b) {
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
 void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, mpz_t x, mpz_t mx_mod_n, mpz_t y, mpz_t my_mod_n) {
     mpz_t r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
+    mpz_init(x); //x
+    mpz_init(mx_mod_n); // -x mod N
+    mpz_init(y); //y
+    mpz_init(my_mod_n); // -y mod N
     mpz_init(r);
     mpz_init(s);
     mpz_init(mx); //-x
@@ -305,6 +314,7 @@ bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t 
         cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
         return false;
     }
+    mpz_init(correct_plaintext);
     //απλώς αφαιρούμε τα 12 τελευταία ψηφία και αποθηκέυουμε τον αριθμό στο correct_plaintext
     std::string buf;
     if (is_x) {

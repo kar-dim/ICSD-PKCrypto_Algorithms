@@ -57,25 +57,20 @@ bool CryptoBase::english_to_decimal(mpz_t number, const std::string &word) {
     for (int i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
         int temp = (int)word[i];
-        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
-        if (CryptoBase::number_of_digits(temp) == 2) {
-            characters_as_numbers += '0';
-            characters_as_numbers += (get_digit(temp, 1) + '0');
-            characters_as_numbers += (get_digit(temp, 0) + '0');
-        }
-        else if (number_of_digits(temp) == 3) {
-            characters_as_numbers += (get_digit(temp, 2) + '0');
-            characters_as_numbers += (get_digit(temp, 1) + '0');
-            characters_as_numbers += (get_digit(temp, 0) + '0');
-        }
-        else {
+        int num_of_digits = CryptoBase::number_of_digits(temp);
+        if (num_of_digits <= 1 || num_of_digits > 3) {
             cout << "Not an English word, can't encrypt it!\n";
             return false;
         }
+        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
+        characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
+        characters_as_numbers += (get_digit(temp, 1) + '0');
+        characters_as_numbers += (get_digit(temp, 0) + '0');
     }
     cout << "Encoded characters: " << characters_as_numbers << "\n\n";
     //τώρα ο πίνακας characters_as_numbers περιέχει τους χαρακτήρες. Άρα για word='rsa' -> 114115097 οπότε αυτός ο αριθμός
     //είναι που θα γίνει (στη συνέχεια) η κρυπτογράφηση, οπότε τον αποθηκεύουμε με το GNUMP
+    mpz_init(number);
     if (mpz_set_str(number, characters_as_numbers.c_str(), 10) == -1) {
         cout << "Failed to encode the word! Can't encrypt\n";
         return false;
@@ -85,27 +80,21 @@ bool CryptoBase::english_to_decimal(mpz_t number, const std::string &word) {
     return true;
 }
 
-void CryptoBase::decimal_to_english(mpz_t number, std::string &final_chars, int max_bits) {
+bool CryptoBase::decimal_to_english(mpz_t number, std::string &final_chars, int max_bits) {
     //για να μετατρέψουμε τον αριθμό σε string θα γεμίσουμε έναν πίνακα χαρακτήρων πρώτα
     std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(temp.get(), "%Zd", number);
     //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα
     if (size < 1) {
         cout << "Could not read the number!\n";
-        exit(-1);
-        return;
+        return false;
     }
-    std::string chars(temp.get()); //chars: αριθμοί σε μορφή characters (πχ '113115097')
-    //chars είναι ο αριθμός αλλά σε char array μορφή, άρα τους διαβάζουμε τρεις μαζί και μετατρέπουμε τον int σε char
-    char temp_buf[3];
-    int j = 0;
+    char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
-        temp_buf[0] = chars[i * 3];
-        temp_buf[1] = chars[(i * 3) + 1];
-        temp_buf[2] = chars[(i * 3) + 2];
+        memcpy(temp_buf, &temp[i * 3], 3);
         //temp τώρα έχει 3 αριθμούς ως χαρακτήρες, πχ το '097' θα το κάνουμε 'a'
         final_chars += atoi(temp_buf); //atoi: int σε char (decoded τιμες, πχ "rsa")
-        j++;
     }
+    return true;
 }
 

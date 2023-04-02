@@ -71,6 +71,8 @@ void CryptoElGamal::print_parameters() {
 }
 
 void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
+    mpz_init(c1);
+    mpz_init(c2);
     //αρχικά δημιουργείται ένας k, 1<=k<=p-2
     mpz_t k, p_minus_two;
     mpz_init(p_minus_two);
@@ -113,6 +115,7 @@ void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
 }
 
 void CryptoElGamal::decrypt(mpz_t c1, mpz_t c2, mpz_t plaintext) {
+    mpz_init(plaintext);
     // πρώτα υπολογίζεται το ενδιάμεσο intermediate = c1 ^ (p - 1 - private_key) mod p
     //στη συνέχεια αποκρυπτογραφείται ως intermediate * c2 mod p
     mpz_t intermediate, exponential, temp;
