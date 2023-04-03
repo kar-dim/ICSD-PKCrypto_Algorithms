@@ -12,7 +12,8 @@ protected:
 	//συνάρτηση για εύρεση του n-οστου ψηφίου ενός αριθμού ξεκινοντας άπό το λιγότερο σήμαντικό ψηφίο
 	static int get_digit(int num, int n);
 public:
-    virtual void init();
+	CryptoBase();
+	~CryptoBase();
 	virtual void initialize_parameters() = 0;
 	virtual void print_parameters() = 0;
 	virtual bool english_to_decimal(mpz_t number, const std::string& word);

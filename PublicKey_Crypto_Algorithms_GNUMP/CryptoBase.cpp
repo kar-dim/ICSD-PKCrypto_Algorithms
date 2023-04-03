@@ -5,13 +5,13 @@
 
 using std::cout;
 
-void CryptoBase::init() {
-    static bool isInitialized = false;
-    if (isInitialized == false) {
-        gmp_randinit_default(state); //αρχικοποίηση του random state
-        gmp_randseed_ui(state, static_cast<unsigned long>(time(NULL)));
-        isInitialized = true;
-    }
+CryptoBase::CryptoBase() {
+    gmp_randinit_default(state); //αρχικοποίηση του random state
+    gmp_randseed_ui(state, static_cast<unsigned long>(time(NULL)));
+}
+
+CryptoBase::~CryptoBase() {
+    gmp_randclear(state);
 }
 
 int CryptoBase::number_of_digits(int n) {

@@ -5,11 +5,16 @@
 
 using std::cout;
 
-void CryptoRabin::init() {
-	CryptoBase::init();
+CryptoRabin::CryptoRabin(): CryptoBase() {
 	mpz_init(p);
 	mpz_init(q);
 	mpz_init(n);
+}
+
+CryptoRabin::~CryptoRabin() {
+    mpz_clear(p);
+    mpz_clear(q);
+    mpz_clear(n);
 }
 
 void CryptoRabin::initialize_parameters() {
@@ -87,9 +92,9 @@ void CryptoRabin::encrypt(mpz_t plaintext, mpz_t ciphertext) {
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
 void CryptoRabin::euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d) {
     mpz_t x1, x2, y1, y2, q, r, qx1, qy1, qb, a_copy, b_copy; //d=gcd
-    mpz_init(a_copy); //a_copy ώστε να μη πειράξουμε τον πρώτο prime
-    mpz_init(b_copy); //b_copy ώστε να μη πειράξουμε τον δεύτερο prime
-    mpz_set(a_copy, a); //a_copy=a και b_copy=b. Θα δουλέψουμε με τα αντίγραφα και όχι με τους a,b
+    mpz_init(a_copy);
+    mpz_init(b_copy);
+    mpz_set(a_copy, a);
     mpz_set(b_copy, b);
     mpz_init(x1);
     mpz_init(x2);
@@ -143,8 +148,8 @@ void CryptoRabin::euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d) {
     mpz_set(d, a_copy);
     mpz_set(x, x2);
     mpz_set(y, y2);
-    //έχουμε τα a,x,y οπότε έχει τελειώσει η διαδικασία
-    //καθαρισμός των temp
+    //τα τα a,x,y έχουν τιμές
+
     mpz_clear(x1);
     mpz_clear(x2);
     mpz_clear(y1);
@@ -219,7 +224,6 @@ void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, 
     //-y mod n (4)
     mpz_mod(my_mod_n, my, n);
 
-    //clear όλων των temp
     mpz_clear(p_plus_one);
     mpz_clear(p_plus_one_div4);
     mpz_clear(q_plus_one);
@@ -238,7 +242,7 @@ void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, 
 
 //εύρεση του σωστού plaintext
 bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t my_mod_n, mpz_t correct_plaintext) {
-    //200*200bits max =400 bits
+    //200*200bits max = 400 bits
     std::unique_ptr<char[]>x_chars(new char[400]);
     std::unique_ptr<char[]>y_chars(new char[400]);
     std::unique_ptr<char[]>mx_chars(new char[400]);

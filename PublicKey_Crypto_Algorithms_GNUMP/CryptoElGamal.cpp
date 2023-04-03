@@ -4,25 +4,30 @@
 
 using std::cout;
 
-void CryptoElGamal::init() {
-	CryptoBase::init();
+CryptoElGamal::CryptoElGamal():CryptoBase() {
     mpz_init(p);
     mpz_init(g);
     mpz_init(a); //a=private key
     mpz_init(public_key);
 }
 
+CryptoElGamal::~CryptoElGamal() {
+    mpz_clear(p);
+    mpz_clear(g);
+    mpz_clear(a);
+    mpz_clear(public_key);
+}
+
 void CryptoElGamal::initialize_parameters() {
-    //p: ενας prime 200 bits, δίνουμε random τιμή και ελέγχουμε αν είναι prime
+    //p: random 200 bit prime
     while (true) {
         //δημιουργία του p
         mpz_urandomb(p, state, 200);
-        if (mpz_probab_prime_p(p, 30) >= 1) {
+        if (mpz_probab_prime_p(p, 30) >= 1)
             break;
-        }
     }
 
-    //Είναι σύνηθες να ισχύει (p-1) = 2g οπότε g = (p-1)/2
+    //Είναι σύνηθες να ισχύει (p-1) = 2g οπότε g (γεννήτορας Z*p) = (p-1)/2
     mpz_t p_minus_one;
     mpz_init(p_minus_one);
 
@@ -30,10 +35,9 @@ void CryptoElGamal::initialize_parameters() {
     mpz_fdiv_q_ui(g, p_minus_one, 2); //g = (p-1)/2
 
     mpz_clear(p_minus_one);
-    //πλέον έχουμε έναν random prime p 200bits και τον γεννήτορα του Z*p
 
     //εύρεση του a (το οποίο είναι ο εκθέτης στο g^a mod p το οποίο είναι το public key)
-    //το α ειναι ενας τυχαιος στο διαστημα [0,p-2
+    //το α ειναι ενας τυχαιος στο διαστημα [0,p-2]
     mpz_t p_minus_two;
     mpz_init(p_minus_two);
     mpz_sub_ui(p_minus_two, p, 2); //p-2
@@ -88,8 +92,7 @@ void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
     mpz_powm(c1, g, k, p);
 
     //c2
-    //gnump δεν επιτρέπει το public_key^k διότι k δεν είναι μικρός ακέραιος αλλά mpz_t (επιτρέπει μόνο x^y αν x είναι mpz_t και y=μικρος ακεραιος)
-    //θα εφαρμόσουμε τον πολλαπλασιαστικό κανόνα: (plaintext * (public_key)^k) mod p = ( (plaintext mod p )*( public_key^k mod p ) ) mod p
+    //πολλαπλασιαστικός κανόνας: (plaintext * (public_key)^k) mod p = ( (plaintext mod p )*( public_key^k mod p ) ) mod p
     mpz_t plaintext_mod_p, public_key_mod_p, intermediate;
     mpz_init(plaintext_mod_p);
     mpz_init(public_key_mod_p);
@@ -101,6 +104,7 @@ void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
     //c2 = intermediate MOD p
     mpz_mod(c2, intermediate, p);
 
+    mpz_clear(k);
     mpz_clear(plaintext_mod_p);
     mpz_clear(public_key_mod_p);
     mpz_clear(intermediate);
@@ -108,8 +112,6 @@ void CryptoElGamal::encrypt(mpz_t input, mpz_t c1, mpz_t c2) {
 
 void CryptoElGamal::decrypt(mpz_t c1, mpz_t c2, mpz_t plaintext) {
     mpz_init(plaintext);
-    //υπολογίζεται το ενδιάμεσο intermediate = c1 ^ (p - 1 - private_key) mod p
-    //στη συνέχεια αποκρυπτογραφείται ως intermediate * c2 mod p
     mpz_t intermediate, exponential, temp;
     mpz_init(intermediate);
     mpz_init(exponential);
@@ -119,7 +121,7 @@ void CryptoElGamal::decrypt(mpz_t c1, mpz_t c2, mpz_t plaintext) {
     mpz_sub(exponential, temp, a); //exponential = p-1-private_key
     mpz_clear(temp);
 
-    //τώρα θα υπολογίσουμε το intermediate
+    //intermediate = c1 ^ (p - 1 - private_key) mod p
     mpz_powm(intermediate, c1, exponential, p);
 
     //αποκρυπτογράφηση ως intermediate * c2 mod p

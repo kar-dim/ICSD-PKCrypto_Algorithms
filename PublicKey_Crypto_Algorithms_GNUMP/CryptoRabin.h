@@ -7,7 +7,8 @@ private:
 	mpz_t p, q, n;
 	void euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d);
 public:
-	void init() override;
+	CryptoRabin();
+	~CryptoRabin();
 	void print_parameters() override;
 	void e_euclid(mpz_t a, mpz_t b, mpz_t gcd_a_b);
 	void initialize_parameters() override;

@@ -4,8 +4,7 @@
 
 using std::cout;
 
-void CryptoRSA::init() {
-    CryptoBase::init();
+CryptoRSA::CryptoRSA(): CryptoBase() {
     //αρχικοποίηση των p,q,n, totient στο 0 και e
     mpz_init(p);
     mpz_init(q);
@@ -14,6 +13,15 @@ void CryptoRSA::init() {
     mpz_init(e);
     mpz_init(d);
     mpz_set_ui(e, 65537);
+}
+
+CryptoRSA::~CryptoRSA() {
+    mpz_clear(p);
+    mpz_clear(q);
+    mpz_clear(n);
+    mpz_clear(totient);
+    mpz_clear(e);
+    mpz_clear(d);
 }
 
 void CryptoRSA::print_parameters() {
@@ -81,24 +89,21 @@ unsigned int CryptoRSA::e_euclid() {
     mpz_init_set(m0, totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
     //για παράδειγμα ομάδα 10 στοιχείων, {0,1,...9}, το -3 είναι το στοιχείο 6 στο Ζ10
 
-    //a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
-    //άρα ο αντίστροφος του μοναδικού στοιχείου άυτού είναι ο εαυτός του, δηλαδή το 0
-    //mpz_cmp_ui επιστρέφει τιμή = 0 αν η σύγκριση είναι αληθές
+    //περίπτωση όπου a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
     if (mpz_cmp_ui(totient, 1) == 0) {
         return 0;
     }
     //επαναληπτικά μέχρι να μη μπορεί να μειωθεί και άλλο το a
     while (mpz_cmp_ui(e, 1) > 0) {
-        mpz_fdiv_q(q, e, totient); //q= αποτέλεσμα διαίρεσης το κρατάμε σε κάθε απανάληψη
+        mpz_fdiv_q(q, e, totient); //q= αποτέλεσμα διαίρεσης
         mpz_set(t, totient);
 
         mpz_set(totient_copy, totient);
-        mpz_mod(totient, e, totient_copy); //m = αποτέλεσμα a MOD m, επίσης το κρατάμε σε κάθε επανάληψη
+        mpz_mod(totient, e, totient_copy); //m = αποτέλεσμα a MOD m
         mpz_set(e, t);
 
         //ενημερώνουμε τα p0,p1.
-        //pi =p(i-2) - p(i-1) q(i-2)(mod n), εδώ το pi είναι το p1, το p(i-2) είναι το t
-        //και p(i-1) είναι το p0
+        //pi =p(i-2) - p(i-1) q(i-2)(mod n), pi είναι το p1, το p(i-2) είναι το t και p(i-1) είναι το p0
         mpz_set(t, p0); //p(i-2) = t
 
         //p(i-1) = p0
@@ -114,13 +119,11 @@ unsigned int CryptoRSA::e_euclid() {
         mpz_init_set(copy_p1, p1);
         //εδώ γίνεται η πρόσθεση με το m0
         mpz_add(p1, copy_p1, m0);
-        //αποδέσμευση μνήμης
         mpz_clear(copy_p1);
     }
     //d=p1, το private key είναι ο inverse
     mpz_set(d, p1);
 
-    //clear όλων των μεταβλητών που δε χρειαζόμαστε πλέον
     mpz_clear(p0);
     mpz_clear(p1);
     mpz_clear(t);
@@ -138,13 +141,10 @@ void CryptoRSA::encrypt(mpz_t rsa_decimal_value, mpz_t ciphertext) {
 
     //m_to_e = m^e
     mpz_pow_ui(m_to_e, rsa_decimal_value, 65537);
-
     //ciphertext = m_to_e MOD n
     mpz_mod(ciphertext, m_to_e, n);
-    //TODO: η mpz_powm δε δουλεύει για κάποιο λόγο στη κρυπτογράφηση, οπότε
-    //αντι να κάνω απευθείας την ύψωση και το modulo, τα έκανα ως 2 βήματα και δουλεύει
-    //στην αποκρυπτογράφηση δουλεύει όμως η συνάρτηση mpz_powm.
-    //mpz_powm(ciphertext, rsa_decimal_value, e, n); //ciphertext = m^e mod n
+
+    mpz_clear(m_to_e);
 }
 
 void CryptoRSA::decrypt(mpz_t plaintext, mpz_t ciphertext) {

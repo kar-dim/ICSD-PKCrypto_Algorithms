@@ -18,7 +18,6 @@ int main(int argc, char** argv) {
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
         CryptoRSA rsa;
-        rsa.init();
 
         //αρχικοποιηση RSA παραμετρων p,q n και totient (phi)
         rsa.initialize_parameters();
@@ -38,6 +37,7 @@ int main(int argc, char** argv) {
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         mpz_t ciphertext;
         rsa.encrypt(rsa_decimal_value, ciphertext);
+        mpz_clear(rsa_decimal_value);
 
         cout << "Encrypted Ciphertext = ";
         mpz_out_str(NULL, 10, ciphertext);
@@ -46,6 +46,7 @@ int main(int argc, char** argv) {
         //decrypt, m = c^d MOD n, c=ciphertext, d=private key, m=plaintext
         mpz_t plaintext;
         rsa.decrypt(plaintext, ciphertext);
+        mpz_clear(ciphertext);
 
         //εκτύπωση του plaintext, πρέπει να είναι ακριβώς ίδιο με το (encoded) μήνυμα.
         cout << "Decrypted (and encoded) Plaintext = ";
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
         std::string decoded;
         rsa.decimal_to_english(plaintext, decoded, 1024);
+        mpz_clear(plaintext);
 
         cout << "Decoded plaintext = " << decoded;
         return 0;
@@ -62,7 +64,6 @@ int main(int argc, char** argv) {
     //elgamal method
     if (crypto_method.compare("elgamal") == 0) {
         CryptoElGamal elgamal;
-        elgamal.init();
 
         elgamal.initialize_parameters();
         elgamal.print_parameters();
@@ -75,6 +76,7 @@ int main(int argc, char** argv) {
         //κρυπτογράφηση
         mpz_t c1, c2;
         elgamal.encrypt(elgamal_decimal_value,c1, c2);
+        mpz_clear(elgamal_decimal_value);
 
         //εκτύπωση των δύο ciphertext
         cout << "Encrypted Ciphertext c1 = ";
@@ -86,6 +88,8 @@ int main(int argc, char** argv) {
         //αποκρυπτογράφηση
         mpz_t decrypted;
         elgamal.decrypt(c1, c2, decrypted);
+        mpz_clear(c1);
+        mpz_clear(c2);
 
         //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = ";
@@ -98,13 +102,13 @@ int main(int argc, char** argv) {
 
         cout << "Decoded plaintext = " << decoded;
 
+        mpz_clear(decrypted);
         return 0;
     }
 
     //rabin cryptosystem
     if (crypto_method.compare("rabin") == 0) {
         CryptoRabin rabin;
-        rabin.init();
 
         rabin.initialize_parameters();
         rabin.print_parameters();
@@ -144,6 +148,10 @@ int main(int argc, char** argv) {
         mpz_t x, y, mx_mod_n, my_mod_n;
         //υπολογίζουμε τα r,s,x,y
         rabin.calculate_four_candidates(ciphertext, a, b, x, mx_mod_n, y, my_mod_n);
+        mpz_clear(ciphertext);
+        mpz_clear(a);
+        mpz_clear(b);
+        mpz_clear(gcd_a_b);
 
         //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
         cout << "1)x = ";
@@ -164,10 +172,15 @@ int main(int argc, char** argv) {
         //decode το plaintext και τέλος
         std::string decoded_word;
         rabin.decimal_to_english(correct_plaintext, decoded_word, 1024);
+        mpz_clear(correct_plaintext);
 
         //εκτύπωση του plaintext
         cout << "Decrypted and decoded (no redundancy) plaintext: " << decoded_word;
 
+        mpz_clear(x);
+        mpz_clear(y);
+        mpz_clear(mx_mod_n);
+        mpz_clear(my_mod_n);
         return 0;
     }
 

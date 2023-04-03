@@ -8,8 +8,8 @@ class CryptoRSA : public CryptoBase
 private:
 	mpz_t p, q, n, e, d, totient;
 public:
-	void init() override;
-
+	CryptoRSA();
+	~CryptoRSA();
 	//υπολογισμος των p,q,n + υπολογισμός του φ(n) = φ(p)φ(q) = (p-1)(q-1), λόγω ότι p,q είναι primes
 	void initialize_parameters() override;
 	//εκτυπωση
