@@ -20,35 +20,30 @@ int main(int argc, char** argv) {
         CryptoRSA rsa;
         rsa.init();
 
-        //τώρα θα φτιάξουμε τους παραμέτρους, δηλαδή το p,q n και totient (phi)
+        //αρχικοποιηση RSA παραμετρων p,q n και totient (phi)
         rsa.initialize_parameters();
         //εκτύπωση των παραμέτρων
         rsa.print_parameters();
 
-        //private key: (d,n) όπου d βρίσκεται ως: e*d = 1 mod (φ(n))
-        //θα χρησιμοποιήσουμε τον επεκταμένο αλγόριθμο του Ευκλείδη για να βρούμε το d
+        //private key: (d,n) όπου d βρίσκεται ως: e*d = 1 mod (φ(n)) μεσω του αλγοριθμου του Ευκλειδη
         rsa.e_euclid();
         rsa.print_private_key();
 
-        //θα εξετάσουμε το string "rsa"
         cout << "Plaintext message = " << input << "\n\n";
 
         mpz_t rsa_decimal_value;
         if (rsa.english_to_decimal(rsa_decimal_value, input) == false)
             return -1;
 
-        //έχουμε στο rsa_decimal_value έναν ακέραιο, οπότε μπορούμε να κρυπτογραφήσουμε με το public key.
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         mpz_t ciphertext;
         rsa.encrypt(rsa_decimal_value, ciphertext);
 
-        //εκτύπωση του ciphertext
         cout << "Encrypted Ciphertext = ";
         mpz_out_str(NULL, 10, ciphertext);
         cout << "\n\n";
 
-        //τώρα θα πάρουμε το ciphertext και θα κάνουμε την αποκρυπτογράφηση. Η πράξη της αποκρυπτογράφησης είναι:
-        //m = c^d MOD n, c=ciphertext, d=private key, m=plaintext, άρα παρόμοια έχουμε:
+        //decrypt, m = c^d MOD n, c=ciphertext, d=private key, m=plaintext
         mpz_t plaintext;
         rsa.decrypt(plaintext, ciphertext);
 
@@ -57,7 +52,7 @@ int main(int argc, char** argv) {
         mpz_out_str(NULL, 10, plaintext);
         cout << "\n\n";
 
-        //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
+        //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
         std::string decoded;
         rsa.decimal_to_english(plaintext, decoded, 1024);
 
@@ -72,13 +67,12 @@ int main(int argc, char** argv) {
         elgamal.initialize_parameters();
         elgamal.print_parameters();
 
-        //θα κρυπτογραφήσουμε το κείμενο
         cout << "Plaintext message = " << input << "\n\n";
 
         mpz_t elgamal_decimal_value;
         elgamal.english_to_decimal(elgamal_decimal_value, input);
 
-        //τώρα θα γίνει η κρυπτογράφηση
+        //κρυπτογράφηση
         mpz_t c1, c2;
         elgamal.encrypt(elgamal_decimal_value,c1, c2);
 
@@ -89,11 +83,11 @@ int main(int argc, char** argv) {
         mpz_out_str(NULL, 10, c2);
         cout << "\n\n";
 
-        //τώρα θα κάνουμε την αποκρυπτογράφηση
+        //αποκρυπτογράφηση
         mpz_t decrypted;
         elgamal.decrypt(c1, c2, decrypted);
 
-        //εκτύπωση, θα πρέπει να εκτυπώνεται ό,τι εκτυπώθηκε και πριν ως encoded plaintext
+        //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = ";
         mpz_out_str(NULL, 10, decrypted);
         cout << "\n\n";
@@ -127,11 +121,9 @@ int main(int argc, char** argv) {
         mpz_out_str(NULL, 10, ciphertext);
         cout << "\n\n";
 
-        //τώρα θα αποκρυπτογραφήσουμε
-        //πρώτα υπολογίζουμε τα a,b που χρειάζονται. Αυτά υπολογίζονται μόνο μια φορά
+        //decrypt
+        //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη. Αυτά υπολογίζονται μόνο μια φορά
         mpz_t a, b, gcd_a_b;
-        //καλούμε τον επεκταμένο αλγόριθμο του ευκλείδη για να βρούμε τα a,b
-        //επειδή θεωρούμε πως η 1η παράμετρος είναι >= της 2ης, θα δώσουμε ως πρώτη παράμετρο τον μεγαλύτερο (προφανώς αντίστοιχα και τα a,b)
         rabin.e_euclid(a, b, gcd_a_b);
 
         //εκτύπωση των a,b και του gcd(a,b)=1
@@ -164,9 +156,7 @@ int main(int argc, char** argv) {
         mpz_out_str(NULL, 10, my_mod_n);
         cout << "\n\n";
 
-        //τώρα πρέπει να βρούμε ποιό από τα 4 είναι το σωστό και τέλος να το κάνουμε decode.
-        //ελέγχουμε τα 12 τελευταία στοιχεία, αν είναι '1' όλα τότε αυτό το plaintext θέλουμε και τα κόβουμε για να πάρουμε το αρχικό plaintext
-        //χωρίς το redundancy
+        //τώρα πρέπει να βρούμε ποιό από τα 4 είναι το σωστό
         mpz_t correct_plaintext;
         if (!rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n, correct_plaintext))
             return -1;

@@ -16,8 +16,7 @@ public:
 	void print_parameters() override;
 	void print_private_key();
 
-	//συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη
-	//βρίσκει τον αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1
+	//συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη (αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1)
 	unsigned int e_euclid();
 
 	void encrypt(mpz_t input, mpz_t output);

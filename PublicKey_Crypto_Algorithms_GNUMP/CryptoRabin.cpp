@@ -13,20 +13,15 @@ void CryptoRabin::init() {
 }
 
 void CryptoRabin::initialize_parameters() {
-    //όπως και στο RSA, έτσι και εδώ θα πρέπει να βρεθούν δύο prime p,q.
-    //με την ίδια ακριβώς διαδικασία τους δημιουργούμε αλλά εδώ έχουμε ένα επιπλέον βήμα
-    //να ελέγξουμε αν p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
+    //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
     mpz_t temp_p, temp_q;
     mpz_init(temp_p);
     mpz_init(temp_q);
-    //δίνουμε random τιμή και ελέγχουμε αν είναι prime
     while (true) {
         //δημιουργία των δυο τυχαίων μεγέθους 200bits
-        //ΣΗΜΕΙΩΣΗ: η ασκηση ζηταει 200bits αλλα ετσι δεν θα μπορουν να (απο)κρυπτογραφηθουν μεγαλα κειμενα, ισως μεγαλυτερο μεγεθος να ηταν πιο σωστο
         mpz_urandomb(p, state, 200);
         mpz_urandomb(q, state, 200);
         //έλεγχος αν είναι prime, αν είναι τότε ελέγχουμε και την επιπλέον συνθήκη, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
-        //το 30 είναι ο αριθμός των επαναλήψεων για να ελεγθεί αν είναι prime
         if (mpz_probab_prime_p(p, 30) >= 1 && mpz_probab_prime_p(q, 30) >= 1) {
             mpz_mod_ui(temp_p, p, 4);
             mpz_mod_ui(temp_q, q, 4);
@@ -59,38 +54,27 @@ void CryptoRabin::print_parameters() {
 bool CryptoRabin::english_to_decimal(mpz_t number, const std::string &word) {
     int size = (int)word.length();
     std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
-    int i;
-    for (i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
         int temp = (int)word[i];
-        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
-        if (number_of_digits(temp) == 2) {
-            characters_as_numbers += '0';
-            characters_as_numbers += (get_digit(temp, 1) + '0');
-            characters_as_numbers += (get_digit(temp, 0) + '0');
-        }
-        else if (number_of_digits(temp) == 3) {
-            characters_as_numbers += (get_digit(temp, 2) + '0');
-            characters_as_numbers += (get_digit(temp, 1) + '0');
-            characters_as_numbers += (get_digit(temp, 0) + '0');
-        }
-        else {
+        int num_of_digits = CryptoBase::number_of_digits(temp);
+        if (num_of_digits <= 1 || num_of_digits > 3) {
             cout << "Not an English word, can't encrypt it!\n";
             return false;
         }
+        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
+        characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
+        characters_as_numbers += (get_digit(temp, 1) + '0');
+        characters_as_numbers += (get_digit(temp, 0) + '0');
     }
-    //γέμισμα με δώδεκα άσους
+    //padding
     characters_as_numbers += "111111111111";
     cout << "Encoded characters (plus redundancy): " << characters_as_numbers << "\n\n";
-    //τώρα ο πίνακας characters_as_numbers περιέχει τους χαρακτήρες. Άρα για word='rsa' -> 114115097 οπότε αυτός ο αριθμός
-    //είναι που θα γίνει (στη συνέχεια) η κρυπτογράφηση, οπότε τον αποθηκεύουμε με το GNUMP
     mpz_init(number);
     if (mpz_set_str(number, characters_as_numbers.c_str(), 10) == -1) {
         cout << "Failed to encode the word! Can't encrypt\n";
         return false;
     }
-    //αν δεν έχουμε φύγει από τη συνάρτηση σημαίνει πως όλα πήγαν καλά
-    //οπότε ο mpz_t number έχει τη τιμή που θέλουμε
     return true;
 }
 
@@ -99,9 +83,7 @@ void CryptoRabin::encrypt(mpz_t plaintext, mpz_t ciphertext) {
     mpz_powm_ui(ciphertext, plaintext, 2, n);
 }
 
-//συνάρτηση που βρίσκει τα x,y ώστε ax + by = 1
-//είναι ο επεκταμένος αλγόριθμος του Ευκλείδη που κάναμε για RSA, όμως τώρα θα τον χρησιμοποιήσουμε
-//για να βρούμε τα x,y (θεωρούμe πως a>=b) καθώς και το gcd το οποίο πρέπει να κάνει 1.
+//επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
 void CryptoRabin::euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d) {
     mpz_t x1, x2, y1, y2, q, r, qx1, qy1, qb, a_copy, b_copy; //d=gcd
@@ -161,7 +143,7 @@ void CryptoRabin::euclid(mpz_t a, mpz_t b, mpz_t x, mpz_t y, mpz_t d) {
     mpz_set(d, a_copy);
     mpz_set(x, x2);
     mpz_set(y, y2);
-    //έχουμε τα a,x,y οπότε τέλος
+    //έχουμε τα a,x,y οπότε έχει τελειώσει η διαδικασία
     //καθαρισμός των temp
     mpz_clear(x1);
     mpz_clear(x2);
@@ -183,11 +165,7 @@ void CryptoRabin::e_euclid(mpz_t a, mpz_t b, mpz_t gcd_a_b) {
     mpz_cmp(p, q) > 1 ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
 }
 
-//έχωντας τα a,b μπορούμε να βρούμε τα 4 πιθανά plaintext
-// r = c^((p+1)/4) MOD p
-// s = c^((q+1)/4) MOD q
-// x = (aps + bqr) MOD n
-// y = (aps - bqr) MOD n
+//εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
 void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, mpz_t x, mpz_t mx_mod_n, mpz_t y, mpz_t my_mod_n) {
     mpz_t r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
@@ -258,15 +236,14 @@ void CryptoRabin::calculate_four_candidates(mpz_t ciphertext, mpz_t a, mpz_t b, 
     mpz_clear(my);
 }
 
+//εύρεση του σωστού plaintext
 bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t my_mod_n, mpz_t correct_plaintext) {
-    //ελέγχεται ένα-ένα αν έχει το redundancy που θέλουμε (δηλαδή 12 άσους στο τέλος)
-    //200*200bits max =400 bits οπότε ας έχουμε 400 buffer size
+    //200*200bits max =400 bits
     std::unique_ptr<char[]>x_chars(new char[400]);
     std::unique_ptr<char[]>y_chars(new char[400]);
     std::unique_ptr<char[]>mx_chars(new char[400]);
     std::unique_ptr<char[]>my_chars(new char[400]);
-    //κάνουμε "dump" στους buffer arrays τους αριθμούς, κρατώντας και το πλήθος των ψηφίων που διαβάστηκαν
-    //θα μας είναι χρήσιμο στο συνέχεια
+    //κάνουμε "dump" στους buffer arrays τους αριθμούς
     int size_x = gmp_sprintf(x_chars.get(), "%Zd", x);
     int size_y = gmp_sprintf(y_chars.get(), "%Zd", y);
     int size_mx = gmp_sprintf(mx_chars.get(), "%Zd", mx_mod_n);
@@ -279,66 +256,56 @@ bool CryptoRabin::get_correct_plaintext(mpz_t x, mpz_t y, mpz_t mx_mod_n, mpz_t 
 
     int i;
     bool is_x = true, is_y = true, is_mx = true, is_my = true;
-    //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα άσοι τότε τους αφαιρούμε
-    //και επιστρέφουμε το αποτέλεσμα
+    //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
+    //και επιστρέφουμε το plaintext
     for (i = size_x - 1; i >= (size_x - 1) - 11; i--) {
-        //αν έστω ένας δεν είναι '1' τότε δεν είναι το σωστό plaintext
         if (x_chars[i] != 1 + '0') {
             is_x = false;
             break;
         }
     }
     for (i = size_y - 1; i >= (size_y - 1) - 11; i--) {
-        //αν έστω ένας δεν είναι '1' τότε δεν είναι το σωστό plaintext
         if (y_chars[i] != 1 + '0') {
             is_y = false;
             break;
         }
     }
     for (i = size_mx - 1; i >= (size_mx - 1) - 11; i--) {
-        //αν έστω ένας δεν είναι '1' τότε δεν είναι το σωστό plaintext
         if (mx_chars[i] != 1 + '0') {
             is_mx = false;
             break;
         }
     }
     for (i = size_my - 1; i >= (size_my - 1) - 11; i--) {
-        //αν έστω ένας δεν είναι '1' τότε δεν είναι το σωστό plaintext
         if (my_chars[i] != 1 + '0') {
             is_my = false;
             break;
         }
     }
-    //πρέπει μόνο ένα boolean να είναι true, αν δε βρέθηκε κανένα τότε δεν έχουμε σωστούς παραμέτρους
     if (is_x == false && is_y == false && is_mx == false && is_my == false) {
         cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
         return false;
     }
     mpz_init(correct_plaintext);
-    //απλώς αφαιρούμε τα 12 τελευταία ψηφία και αποθηκέυουμε τον αριθμό στο correct_plaintext
     std::string buf;
     if (is_x) {
         for (i = 0; i < size_x - 12; i++)
             buf += x_chars[i];
-        //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
         gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_y) {
         for (i = 0; i < size_y - 12; i++)
             buf += y_chars[i];
-        //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
         gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_mx) {
         for (i = 0; i < size_mx - 12; i++)
             buf += mx_chars[i];
-        //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
         gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     else if (is_my) {
         for (i = 0; i < size_my - 12; i++)
             buf += my_chars[i];
-        //πετάμε από το buf το οποίο έχει το plaintext χωρίς redundancy στο correct_plaintext
         gmp_sscanf(buf.c_str(), "%Zd", correct_plaintext);
     }
     return true;

@@ -39,16 +39,11 @@ void CryptoRSA::print_private_key() {
 }
 
 void CryptoRSA::initialize_parameters() {
-    //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι 512bits αλλά και prime
-    //θα χρησιμοποιήσουμε το Miller-Rabin test για να ελέγξουμε αν είναι prime
-
-    //δίνουμε random τιμή και ελέγχουμε αν είναι prime
+    //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime 512bits
     while (true) {
         //δημιουργία των δυο τυχαίων
         mpz_urandomb(p, state, 512);
         mpz_urandomb(q, state, 512);
-        //έλεγχος αν είναι prime, αν είναι τότε break, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
-        //το 30 είναι ο αριθμός των επαναλήψεων για να ελεγθεί αν είναι prime
         if (mpz_probab_prime_p(p, 30) >= 1 && mpz_probab_prime_p(q, 30) >= 1) {
             break;
         }
@@ -67,8 +62,7 @@ void CryptoRSA::initialize_parameters() {
     mpz_sub_ui(q_minus_one, q, 1);
     // totient = (p-1)(q-1)
     mpz_mul(totient, p_minus_one, q_minus_one);
-    //εφόσον έχουμε το totient, δε χρειαζόμαστε τα p_minus_one και q_minus_one
-    //οπότε τα αφαιρούμε από τη μνήμη
+
     mpz_clear(p_minus_one);
     mpz_clear(q_minus_one);
 }
@@ -102,7 +96,7 @@ unsigned int CryptoRSA::e_euclid() {
         mpz_mod(totient, e, totient_copy); //m = αποτέλεσμα a MOD m, επίσης το κρατάμε σε κάθε επανάληψη
         mpz_set(e, t);
 
-        //εδώ ενημερώνουμε τα p0,p1 κάθε φορά. Ο αλγόριθμος μας λέει πως
+        //ενημερώνουμε τα p0,p1.
         //pi =p(i-2) - p(i-1) q(i-2)(mod n), εδώ το pi είναι το p1, το p(i-2) είναι το t
         //και p(i-1) είναι το p0
         mpz_set(t, p0); //p(i-2) = t
@@ -147,7 +141,7 @@ void CryptoRSA::encrypt(mpz_t rsa_decimal_value, mpz_t ciphertext) {
 
     //ciphertext = m_to_e MOD n
     mpz_mod(ciphertext, m_to_e, n);
-    //σημείωση: η mpz_powm δε δουλεύει για κάποιο λόγο στη κρυπτογράφηση, οπότε
+    //TODO: η mpz_powm δε δουλεύει για κάποιο λόγο στη κρυπτογράφηση, οπότε
     //αντι να κάνω απευθείας την ύψωση και το modulo, τα έκανα ως 2 βήματα και δουλεύει
     //στην αποκρυπτογράφηση δουλεύει όμως η συνάρτηση mpz_powm.
     //mpz_powm(ciphertext, rsa_decimal_value, e, n); //ciphertext = m^e mod n
