@@ -3,13 +3,13 @@
 class CryptoElGamal : public CryptoBase
 {
 private:
-	mpz_t p, g, a, public_key;
+	gmp::Mpz p, g, a, public_key;
 public:
-	CryptoElGamal();
-	~CryptoElGamal();
+	CryptoElGamal() = default;
+	~CryptoElGamal() = default;
 	void initialize_parameters() override;
 	void print_parameters() override;
-	void encrypt(mpz_t input, mpz_t ciphertext1, mpz_t ciphertext2);
-	void decrypt(mpz_t ciphertext1, mpz_t ciphertext2, mpz_t output_plaintext);
+	void encrypt(const gmp::Mpz &input, gmp::Mpz &ciphertext1, gmp::Mpz &ciphertext2);
+	void decrypt(const gmp::Mpz &ciphertext1, const gmp::Mpz &ciphertext2, gmp::Mpz &output_plaintext);
 };
 
