@@ -30,6 +30,9 @@
     <ClCompile Include="CryptoRabin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mpz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CryptoRSA.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CryptoRabin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mpz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

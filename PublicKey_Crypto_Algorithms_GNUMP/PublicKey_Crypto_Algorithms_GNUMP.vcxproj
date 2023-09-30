@@ -133,12 +133,14 @@
     <ClCompile Include="CryptoRabin.cpp" />
     <ClCompile Include="CryptoRSA.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mpz.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CryptoBase.h" />
     <ClInclude Include="CryptoElGamal.h" />
     <ClInclude Include="CryptoRabin.h" />
     <ClInclude Include="CryptoRSA.h" />
+    <ClInclude Include="Mpz.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

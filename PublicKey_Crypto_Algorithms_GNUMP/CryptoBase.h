@@ -2,6 +2,7 @@
 
 #include<gmp.h>
 #include <string>
+#include "Mpz.h"
 
 class CryptoBase
 {
@@ -16,7 +17,7 @@ public:
 	~CryptoBase();
 	virtual void initialize_parameters() = 0;
 	virtual void print_parameters() = 0;
-	virtual bool english_to_decimal(mpz_t number, const std::string& word);
-	bool decimal_to_english(mpz_t number, std::string& final_chars, int max_bits);
+	virtual bool english_to_decimal(gmp::Mpz& number, const std::string& word);
+	bool decimal_to_english(gmp::Mpz &number, std::string& final_chars, int max_bits);
 };
 

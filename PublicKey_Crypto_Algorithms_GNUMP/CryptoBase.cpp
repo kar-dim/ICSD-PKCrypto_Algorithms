@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include "Mpz.h"
 
 using std::cout;
 
@@ -44,7 +45,7 @@ int CryptoBase::get_digit(int num, int n) {
     return result;
 }
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
-bool CryptoBase::english_to_decimal(mpz_t number, const std::string &word) {
+bool CryptoBase::english_to_decimal(gmp::Mpz &number, const std::string &word) {
     int size = (int)word.length();
     std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
     for (int i = 0; i < size; i++) {
@@ -62,15 +63,14 @@ bool CryptoBase::english_to_decimal(mpz_t number, const std::string &word) {
     }
     cout << "Encoded characters: " << characters_as_numbers << "\n\n";
     //store σε GNU MP array
-    mpz_init(number);
-    if (mpz_set_str(number, characters_as_numbers.c_str(), 10) == -1) {
+    if (number.Mpz_set_str(characters_as_numbers.c_str()) == -1) {
         cout << "Failed to encode the word! Can't encrypt\n";
         return false;
     }
     return true;
 }
 
-bool CryptoBase::decimal_to_english(mpz_t number, std::string &final_chars, int max_bits) {
+bool CryptoBase::decimal_to_english(gmp::Mpz& number, std::string &final_chars, int max_bits) {
     std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(temp.get(), "%Zd", number);
     //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα
