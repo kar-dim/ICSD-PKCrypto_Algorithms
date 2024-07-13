@@ -2,6 +2,7 @@
 #include <string>
 #include <gmp.h>
 #include <iostream>
+#include <cstring>
 
 using std::cout;
 
@@ -171,8 +172,18 @@ void CryptoRabin::calculate_four_candidates(const gmp::Mpz& ciphertext, const gm
     my_mod_n.Mpz_mod(my, n);
 }
 
-//εύρεση του σωστού plaintext
+//βοηθητική μέθοδος για έλεγχο των decrypted plaintext
+bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) {
+    return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
+}
+//βοηθητική μέθοδος για να γεμισει το τελικο plaintext με βαση το decrypted plaintext (αν ειναι το σωστο, αλλιως δεν κανει τιποτα)
+void CryptoRabin::check_and_retrieve_plaintext(bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) {
+    if (is_correct) {
+       buf.append(chars.get(), size - 12);
+    }
+}
 
+//εύρεση του σωστού plaintext
 bool CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n, gmp::Mpz& correct_plaintext) {
     //200*200bits max = 400 bits
     std::unique_ptr<char[]>x_chars(new char[400]);
@@ -191,56 +202,24 @@ bool CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, co
         return false;
     }
 
-    int i;
-    bool is_x = true, is_y = true, is_mx = true, is_my = true;
     //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
     //και επιστρέφουμε το plaintext
-    for (i = size_x - 1; i >= (size_x - 1) - 11; i--) {
-        if (x_chars[i] != 1 + '0') {
-            is_x = false;
-            break;
-        }
-    }
-    for (i = size_y - 1; i >= (size_y - 1) - 11; i--) {
-        if (y_chars[i] != 1 + '0') {
-            is_y = false;
-            break;
-        }
-    }
-    for (i = size_mx - 1; i >= (size_mx - 1) - 11; i--) {
-        if (mx_chars[i] != 1 + '0') {
-            is_mx = false;
-            break;
-        }
-    }
-    for (i = size_my - 1; i >= (size_my - 1) - 11; i--) {
-        if (my_chars[i] != 1 + '0') {
-            is_my = false;
-            break;
-        }
-    }
+    bool is_x = check_plaintext_chars(x_chars, size_x);
+    bool is_y = check_plaintext_chars(y_chars, size_y);
+    bool is_mx = check_plaintext_chars(mx_chars, size_mx);
+    bool is_my = check_plaintext_chars(my_chars, size_my);
+
     if (is_x == false && is_y == false && is_mx == false && is_my == false) {
         cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
         return false;
     }
 
     std::string buf;
-    if (is_x) {
-        for (i = 0; i < size_x - 12; i++)
-            buf += x_chars[i];
-    }
-    else if (is_y) {
-        for (i = 0; i < size_y - 12; i++)
-            buf += y_chars[i];
-    }
-    else if (is_mx) {
-        for (i = 0; i < size_mx - 12; i++)
-            buf += mx_chars[i];
-    }
-    else if (is_my) {
-        for (i = 0; i < size_my - 12; i++)
-            buf += my_chars[i];
-    }
+    check_and_retrieve_plaintext(is_x, x_chars, size_x, buf);
+    check_and_retrieve_plaintext(is_y, y_chars, size_y, buf);
+    check_and_retrieve_plaintext(is_mx, mx_chars, size_mx, buf);
+    check_and_retrieve_plaintext(is_my, my_chars, size_my, buf);
+    
     correct_plaintext.sscanf(buf.c_str(), "%Zd");
     return true;
 }
