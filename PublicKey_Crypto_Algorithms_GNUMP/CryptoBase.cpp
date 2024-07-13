@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <cstring>
+#include <cmath>
 #include "Mpz.h"
 
 using std::cout;
@@ -28,25 +30,17 @@ int CryptoBase::number_of_digits(int n) {
 
 //συνάρτηση για να βρούμε το n-οστό ψηφίο ενός αριθμού
 int CryptoBase::get_digit(int num, int n) {
-    int result, res1, res2;
-    //res1 = 10^4 = 10000
-    res1 = (int)pow(10, n + 1);
-    //r = 5721 % 10000 -> r=5721
-    result = num % res1;
-
+    int result = num % static_cast<int>(std::pow(10, n + 1));
     //αν δε θέλουμε το τελευταίο ψηφίο χρειάζεται ακόμα μια διαίρεση
     if (n > 0) {
-        //res2 = 10^3 = 1000
-        res2 = (int)pow(10, n);
-        //r = 5721 / 1000 = 5
-        result = result / res2;
+        result /= static_cast<int>(std::pow<int>(10, n));
     }
-
     return result;
 }
+
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
 bool CryptoBase::english_to_decimal(gmp::Mpz &number, const std::string &word) {
-    int size = (int)word.length();
+    auto size = word.length();
     std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
     for (int i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
@@ -80,7 +74,7 @@ bool CryptoBase::decimal_to_english(gmp::Mpz& number, std::string &final_chars, 
     }
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
-        memcpy(temp_buf, &temp[i * 3], 3);
+        std::memcpy(temp_buf, &temp[i * 3], 3);
         final_chars += atoi(temp_buf);
     }
     return true;

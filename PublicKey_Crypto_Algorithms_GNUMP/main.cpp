@@ -22,7 +22,6 @@ int main(int argc, char** argv) {
 
         //αρχικοποιηση RSA παραμετρων p,q n και totient (phi)
         rsa.initialize_parameters();
-        //εκτύπωση των παραμέτρων
         rsa.print_parameters();
 
         //private key: (d,n) όπου d βρίσκεται ως: e*d = 1 mod (φ(n)) μεσω του αλγοριθμου του Ευκλειδη
@@ -119,7 +118,7 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //decrypt
-        //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη. Αυτά υπολογίζονται μόνο μια φορά
+        //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη
         gmp::Mpz a, b, gcd_a_b;
         rabin.e_euclid(a, b, gcd_a_b);
 

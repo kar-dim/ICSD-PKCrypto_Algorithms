@@ -9,7 +9,6 @@ class CryptoBase
 protected:
     gmp_randstate_t state; //random state χρειάζεται για να δουλέψουν οι αλγόριθμοι παραγωγής τυχαίων
 	static int number_of_digits(int n);
-
 	//συνάρτηση για εύρεση του n-οστου ψηφίου ενός αριθμού ξεκινοντας άπό το λιγότερο σήμαντικό ψηφίο
 	static int get_digit(int num, int n);
 public:
