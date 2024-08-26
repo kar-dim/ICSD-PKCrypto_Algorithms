@@ -1,7 +1,6 @@
 ﻿#pragma once
-
-#include <gmp.h>
 #include "CryptoBase.h"
+#include "Mpz.h"
 
 class CryptoRSA : public CryptoBase
 {

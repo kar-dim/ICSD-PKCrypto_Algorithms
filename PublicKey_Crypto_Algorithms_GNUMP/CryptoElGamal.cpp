@@ -1,4 +1,5 @@
 ﻿#include "CryptoElGamal.h"
+#include "Mpz.h"
 #include <iostream>
 
 using std::cout;

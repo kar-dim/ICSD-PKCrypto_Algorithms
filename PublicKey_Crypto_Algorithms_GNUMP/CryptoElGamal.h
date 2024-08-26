@@ -1,5 +1,7 @@
 #pragma once
 #include "CryptoBase.h"
+#include "Mpz.h"
+
 class CryptoElGamal : public CryptoBase
 {
 private:

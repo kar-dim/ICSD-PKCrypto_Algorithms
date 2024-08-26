@@ -6,6 +6,7 @@
 #include "Mpz.h"
 
 using std::cout;
+using std::string;
 
 int main(int argc, char** argv) {
 
@@ -14,8 +15,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    std::string crypto_method(argv[1]);
-    std::string input(argv[2]);
+    string crypto_method(argv[1]);
+    string input(argv[2]);
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
         CryptoRSA rsa;
@@ -52,7 +53,7 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
-        std::string decoded;
+        string decoded;
         rsa.decimal_to_english(plaintext, decoded, 1024);
 
         cout << "Decoded plaintext = " << decoded;
@@ -91,7 +92,7 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
-        std::string decoded;
+        string decoded;
         elgamal.decimal_to_english(decrypted, decoded, 200);
 
         cout << "Decoded plaintext = " << decoded;
@@ -158,7 +159,7 @@ int main(int argc, char** argv) {
             return -1;
 
         //decode το plaintext και τέλος
-        std::string decoded_word;
+        string decoded_word;
         rabin.decimal_to_english(correct_plaintext, decoded_word, 1024);
 
         //εκτύπωση του plaintext

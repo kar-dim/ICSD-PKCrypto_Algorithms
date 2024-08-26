@@ -10,26 +10,27 @@ using std::cout;
 
 CryptoBase::CryptoBase() {
     gmp_randinit_default(state); //αρχικοποίηση του random state
-    gmp_randseed_ui(state, static_cast<unsigned long>(time(NULL)));
+    gmp_randseed_ui(state, static_cast<ulong>(time(NULL)));
 }
 
 CryptoBase::~CryptoBase() {
     gmp_randclear(state);
 }
 
-int CryptoBase::number_of_digits(int n) {
+int CryptoBase::number_of_digits(const int n) {
     if (n < 0) return -1;
+    int remainder = n;
     int count = 0;
     //μετράμε πόσες φορές γίνεται η διαίρεση με το 10
-    while (n != 0) {
-        n = n / 10;
+    while (remainder != 0) {
+        remainder /= 10;
         ++count;
     }
     return count;
 }
 
 //συνάρτηση για να βρούμε το n-οστό ψηφίο ενός αριθμού
-int CryptoBase::get_digit(int num, int n) {
+int CryptoBase::get_digit(const int num, const int n) {
     int result = num % static_cast<int>(std::pow(10, n + 1));
     //αν δε θέλουμε το τελευταίο ψηφίο χρειάζεται ακόμα μια διαίρεση
     if (n > 0) {
@@ -64,7 +65,7 @@ bool CryptoBase::english_to_decimal(gmp::Mpz &number, const std::string &word) {
     return true;
 }
 
-bool CryptoBase::decimal_to_english(gmp::Mpz& number, std::string &final_chars, int max_bits) {
+bool CryptoBase::decimal_to_english(gmp::Mpz& number, std::string &final_chars, const int max_bits) {
     std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(temp.get(), "%Zd", number);
     //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα

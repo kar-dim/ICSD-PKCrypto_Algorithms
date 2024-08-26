@@ -1,8 +1,8 @@
 ﻿#include "CryptoRabin.h"
-#include <string>
-#include <gmp.h>
-#include <iostream>
+#include "Mpz.h"
 #include <cstring>
+#include <iostream>
+#include <string>
 
 using std::cout;
 
@@ -36,7 +36,6 @@ void CryptoRabin::print_parameters() {
     n.Mpz_out_str();
     cout << "\n\n";
 }
-
 
 bool CryptoRabin::english_to_decimal(gmp::Mpz &number, const std::string &word) {
     int size = (int)word.length();
@@ -177,10 +176,9 @@ bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, co
     return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
 }
 //βοηθητική μέθοδος για να γεμισει το τελικο plaintext με βαση το decrypted plaintext (αν ειναι το σωστο, αλλιως δεν κανει τιποτα)
-void CryptoRabin::check_and_retrieve_plaintext(bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) {
-    if (is_correct) {
+void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) {
+    if (is_correct)
        buf.append(chars.get(), size - 12);
-    }
 }
 
 //εύρεση του σωστού plaintext

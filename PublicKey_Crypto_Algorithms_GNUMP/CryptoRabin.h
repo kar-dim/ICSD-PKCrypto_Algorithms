@@ -1,13 +1,15 @@
 #pragma once
 #include "CryptoBase.h"
-#include <string>
+#include "Mpz.h"
 #include <memory>
+#include <string>
+
 class CryptoRabin : public CryptoBase
 {
 private:
 	gmp::Mpz p, q, n;
 	void euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d);
-	void check_and_retrieve_plaintext(bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string& buf);
+	void check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string& buf);
 	bool check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size);
 public:
 	CryptoRabin() = default;
