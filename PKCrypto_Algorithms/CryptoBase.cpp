@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <format>
 
 using std::cout;
 using std::string;
@@ -42,23 +43,27 @@ int CryptoBase::get_digit(const int num, const int n) {
     return result;
 }
 
+string CryptoBase::english_to_decimal_str(const string& word) const {
+    string characters_as_numbers; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
+    for (auto i = 0; i < word.length(); i++) {
+        //παίρνουμε τη ASCII μορφή του χαρακτήρα
+        const int ascii_value = static_cast<int>(word[i]);
+        const int num_of_digits = CryptoBase::number_of_digits(ascii_value);
+        if (num_of_digits <= 1 || num_of_digits > 3)
+            return "";
+        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
+        characters_as_numbers += std::format("{:03}", ascii_value);
+    }
+    return characters_as_numbers;
+}
+
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
 gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
     gmp::Mpz number;
-    auto size = word.length();
-    string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
-    for (int i = 0; i < size; i++) {
-        //παίρνουμε τη ASCII μορφή του χαρακτήρα
-        int temp = (int)word[i];
-        int num_of_digits = CryptoBase::number_of_digits(temp);
-        if (num_of_digits <= 1 || num_of_digits > 3) {
-            cout << "Not an English word, can't encrypt it!\n";
-            return number;
-        }
-        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
-        characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
-        characters_as_numbers += (get_digit(temp, 1) + '0');
-        characters_as_numbers += (get_digit(temp, 0) + '0');
+    string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
+    if (characters_as_numbers.empty()) {
+        cout << "Not an English letter found, can't encode!\n";
+        return number;
     }
     cout << "Encoded characters: " << characters_as_numbers << "\n\n";
     //store σε GNU MP array

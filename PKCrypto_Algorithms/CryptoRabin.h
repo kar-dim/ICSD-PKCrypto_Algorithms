@@ -9,7 +9,7 @@ class CryptoRabin : public CryptoBase
 private:
 	gmp::Mpz p, q, n;
 	void euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) const;
-	void check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string& buf) const;
+	void check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const size_t size, std::string& buf) const;
 	bool check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const;
 public:
 	CryptoRabin() = default;

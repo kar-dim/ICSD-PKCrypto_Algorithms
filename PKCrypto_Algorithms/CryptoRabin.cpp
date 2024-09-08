@@ -4,8 +4,10 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <format>
 
 using std::cout;
+using std::string;
 
 void CryptoRabin::initialize_parameters() {
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
@@ -20,7 +22,7 @@ void CryptoRabin::initialize_parameters() {
             temp_q.Mpz_mod_ui(q, 4);
             //εναλλακτικά μπορούσαμε με τη συνάρτηση mpz_congruent_p_ui_p απευθείας
             //έλεγχος αν είναι ίδια και ίσα με 3
-            if (temp_p.Mpz_cmp_ui(3)== 0 && temp_q.Mpz_cmp_ui(3) == 0)
+            if (temp_p.Mpz_cmp_ui(3) == 0 && temp_q.Mpz_cmp_ui(3) == 0)
                 break;
         }
     }
@@ -38,22 +40,12 @@ void CryptoRabin::print_parameters() const {
     cout << "\n\n";
 }
 
-gmp::Mpz CryptoRabin::english_to_decimal(const std::string &word) const {
-    int size = (int)word.length();
+gmp::Mpz CryptoRabin::english_to_decimal(const string &word) const {
     gmp::Mpz number;
-    std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
-    for (int i = 0; i < size; i++) {
-        //παίρνουμε τη ASCII μορφή του χαρακτήρα
-        int temp = (int)word[i];
-        int num_of_digits = CryptoBase::number_of_digits(temp);
-        if (num_of_digits <= 1 || num_of_digits > 3) {
-            cout << "Not an English word, can't encrypt it!\n";
-            return number;
-        }
-        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
-        characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
-        characters_as_numbers += (get_digit(temp, 1) + '0');
-        characters_as_numbers += (get_digit(temp, 0) + '0');
+    string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
+    if (characters_as_numbers.empty()) {
+        cout << "Not an English letter found, can't encode!\n";
+        return number;
     }
     //padding
     characters_as_numbers += "111111111111";
@@ -175,7 +167,7 @@ bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, co
     return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
 }
 //βοηθητική μέθοδος για να γεμισει το τελικο plaintext με βαση το decrypted plaintext (αν ειναι το σωστο, αλλιως δεν κανει τιποτα)
-void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) const {
+void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const size_t size, string &buf) const {
     if (is_correct)
        buf.append(chars.get(), size - 12);
 }
@@ -211,7 +203,7 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
         return gmp::Mpz();
     }
 
-    std::string buf;
+    string buf;
     check_and_retrieve_plaintext(is_x, x_chars, size_x, buf);
     check_and_retrieve_plaintext(is_y, y_chars, size_y, buf);
     check_and_retrieve_plaintext(is_mx, mx_chars, size_mx, buf);

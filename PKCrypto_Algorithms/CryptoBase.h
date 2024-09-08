@@ -11,6 +11,7 @@ protected:
 	static int number_of_digits(const int n);
 	//συνάρτηση για εύρεση του n-οστου ψηφίου ενός αριθμού ξεκινοντας άπό το λιγότερο σήμαντικό ψηφίο
 	static int get_digit(const int num, const int n);
+	std::string english_to_decimal_str(const std::string& word) const;
 public:
 	CryptoBase();
 	virtual ~CryptoBase();
