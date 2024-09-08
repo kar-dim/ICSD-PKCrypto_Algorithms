@@ -11,7 +11,7 @@ namespace gmp {
 	public:
 		Mpz();
 		Mpz(const ulong);
-		Mpz(const Mpz& a);
+		Mpz(const Mpz& other);
 		~Mpz();
 
 		auto inline get() const { return _value; }

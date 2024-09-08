@@ -9,8 +9,8 @@ gmp::Mpz::Mpz(const ulong n) {
 	mpz_init_set_ui(_value, n);
 }
 
-gmp::Mpz::Mpz(const gmp::Mpz &to_copy) {
-	mpz_init_set(_value, to_copy._value);
+gmp::Mpz::Mpz(const gmp::Mpz &other) {
+	mpz_init_set(_value, other._value);
 }
 
 gmp::Mpz::~Mpz() {
