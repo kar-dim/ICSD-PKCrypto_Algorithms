@@ -17,6 +17,10 @@ gmp::Mpz::~Mpz() {
 	mpz_clear(_value);
 }
 
+bool gmp::Mpz::isEmpty() const {
+	return _value[0]._mp_alloc == 0;
+}
+
 int gmp::Mpz::sprintf(char* a, const char* b) const {
 	return gmp_sprintf(a, b, _value);
 }

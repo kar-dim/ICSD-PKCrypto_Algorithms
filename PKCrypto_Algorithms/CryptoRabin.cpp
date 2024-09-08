@@ -2,6 +2,7 @@
 #include "Mpz.h"
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <string>
 
 using std::cout;
@@ -27,7 +28,7 @@ void CryptoRabin::initialize_parameters() {
     n.Mpz_mul(p, q);
 }
 
-void CryptoRabin::print_parameters() {
+void CryptoRabin::print_parameters() const {
     cout << "p = ";
     p.Mpz_out_str();
     cout << "\n\nq = ";
@@ -37,8 +38,9 @@ void CryptoRabin::print_parameters() {
     cout << "\n\n";
 }
 
-bool CryptoRabin::english_to_decimal(gmp::Mpz &number, const std::string &word) {
+gmp::Mpz CryptoRabin::english_to_decimal(const std::string &word) const {
     int size = (int)word.length();
+    gmp::Mpz number;
     std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
     for (int i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
@@ -46,7 +48,7 @@ bool CryptoRabin::english_to_decimal(gmp::Mpz &number, const std::string &word) 
         int num_of_digits = CryptoBase::number_of_digits(temp);
         if (num_of_digits <= 1 || num_of_digits > 3) {
             cout << "Not an English word, can't encrypt it!\n";
-            return false;
+            return number;
         }
         //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
         characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
@@ -56,20 +58,17 @@ bool CryptoRabin::english_to_decimal(gmp::Mpz &number, const std::string &word) 
     //padding
     characters_as_numbers += "111111111111";
     cout << "Encoded characters (plus redundancy): " << characters_as_numbers << "\n\n";
-    if (number.Mpz_set_str(characters_as_numbers.c_str()) == -1) {
-        cout << "Failed to encode the word! Can't encrypt\n";
-        return false;
-    }
-    return true;
+    number.Mpz_set_str(characters_as_numbers.c_str());
+    return number;
 }
 
-void CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) {
+void CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) const {
     ciphertext.Mpz_powm_ui(plaintext, 2, n);
 }
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
-void CryptoRabin::euclid(gmp::Mpz &a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) {
+void CryptoRabin::euclid(gmp::Mpz &a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) const {
     gmp::Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
     gmp::Mpz a_copy(a), b_copy(b);
 
@@ -135,7 +134,7 @@ void CryptoRabin::e_euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& gcd_a_b) {
 
 //εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
-void CryptoRabin::calculate_four_candidates(const gmp::Mpz& ciphertext, const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& mx_mod_n, gmp::Mpz& y, gmp::Mpz& my_mod_n) {
+void CryptoRabin::calculate_four_candidates(const gmp::Mpz& ciphertext, const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& mx_mod_n, gmp::Mpz& y, gmp::Mpz& my_mod_n) const {
     gmp::Mpz r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
 
     // r = c^((p+1)/4) MOD p
@@ -172,17 +171,17 @@ void CryptoRabin::calculate_four_candidates(const gmp::Mpz& ciphertext, const gm
 }
 
 //βοηθητική μέθοδος για έλεγχο των decrypted plaintext
-bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) {
+bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const {
     return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
 }
 //βοηθητική μέθοδος για να γεμισει το τελικο plaintext με βαση το decrypted plaintext (αν ειναι το σωστο, αλλιως δεν κανει τιποτα)
-void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) {
+void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const int size, std::string &buf) const {
     if (is_correct)
        buf.append(chars.get(), size - 12);
 }
 
 //εύρεση του σωστού plaintext
-bool CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n, gmp::Mpz& correct_plaintext) {
+gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n) const {
     //200*200bits max = 400 bits
     std::unique_ptr<char[]>x_chars(new char[400]);
     std::unique_ptr<char[]>y_chars(new char[400]);
@@ -209,7 +208,7 @@ bool CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, co
 
     if (is_x == false && is_y == false && is_mx == false && is_my == false) {
         cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
-        return false;
+        return gmp::Mpz();
     }
 
     std::string buf;
@@ -218,6 +217,7 @@ bool CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, co
     check_and_retrieve_plaintext(is_mx, mx_chars, size_mx, buf);
     check_and_retrieve_plaintext(is_my, my_chars, size_my, buf);
     
+    gmp::Mpz correct_plaintext;
     correct_plaintext.sscanf(buf.c_str(), "%Zd");
-    return true;
+    return correct_plaintext;
 }

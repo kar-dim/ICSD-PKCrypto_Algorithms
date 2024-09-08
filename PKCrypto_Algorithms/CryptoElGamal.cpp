@@ -34,7 +34,7 @@ void CryptoElGamal::initialize_parameters() {
     public_key.Mpz_powm(g, a, p);
 }
 
-void CryptoElGamal::print_parameters() {
+void CryptoElGamal::print_parameters() const {
     cout << "p = ";
     p.Mpz_out_str();
     cout << "\n\ng = ";

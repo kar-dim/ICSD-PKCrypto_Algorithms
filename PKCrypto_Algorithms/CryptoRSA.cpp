@@ -9,7 +9,7 @@ CryptoRSA::CryptoRSA(): CryptoBase() {
     e.Mpz_set_ui(65537);
 }
 
-void CryptoRSA::print_parameters() {
+void CryptoRSA::print_parameters() const {
     cout << "p = ";
     p.Mpz_out_str();
     cout << "\n\nq = ";
@@ -21,7 +21,7 @@ void CryptoRSA::print_parameters() {
     cout << "\n\nPublic key is n and e = 65537\n\n";
 }
 
-void CryptoRSA::print_private_key() {
+void CryptoRSA::print_private_key() const {
     cout << "private key = ";
     d.Mpz_out_str();
     cout << "\n\n";
@@ -53,14 +53,14 @@ void CryptoRSA::initialize_parameters() {
 
 //συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη
 //βρίσκει τον αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1
-unsigned int CryptoRSA::e_euclid() {
+void CryptoRSA::e_euclid() {
     gmp::Mpz t, q, totient_copy, q_mul_p0;
-    gmp::Mpz p0(0UL), p1(1);
+    gmp::Mpz p0(0), p1(1);
     gmp::Mpz m0(totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
 
     //περίπτωση όπου a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
     if (totient.Mpz_cmp_ui(1) == 0)
-        return 0;
+        return;
 
     //επαναληπτικά μέχρι να μη μπορεί να μειωθεί και άλλο το a
     while (e.Mpz_cmp_ui(1) > 0) {
@@ -87,15 +87,15 @@ unsigned int CryptoRSA::e_euclid() {
     }
     //d=p1, το private key είναι ο inverse
     d = p1;
-    return 0;
+    return;
 }
 
-void CryptoRSA::encrypt(const gmp::Mpz &rsa_decimal_value, gmp::Mpz &ciphertext) {
+void CryptoRSA::encrypt(const gmp::Mpz &rsa_decimal_value, gmp::Mpz &ciphertext) const {
     gmp::Mpz m_to_e;
     m_to_e.Mpz_pow_ui(rsa_decimal_value, 65537);
     ciphertext.Mpz_mod(m_to_e, n);
 }
 
-void CryptoRSA::decrypt(gmp::Mpz &plaintext, const gmp::Mpz &ciphertext) {
+void CryptoRSA::decrypt(gmp::Mpz &plaintext, const gmp::Mpz &ciphertext) const {
     plaintext.Mpz_powm(ciphertext, d, n);
 }

@@ -1,4 +1,5 @@
-﻿#include "CryptoRSA.h"
+﻿#include "CryptoBase.h"
+#include "CryptoRSA.h"
 #include "CryptoElGamal.h"
 #include "CryptoRabin.h"
 #include <string>
@@ -15,8 +16,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    string crypto_method(argv[1]);
-    string input(argv[2]);
+    const string crypto_method(argv[1]);
+    const string input(argv[2]);
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
         CryptoRSA rsa;
@@ -31,10 +32,11 @@ int main(int argc, char** argv) {
 
         cout << "Plaintext message = " << input << "\n\n";
 
-        gmp::Mpz rsa_decimal_value;
-        if (rsa.english_to_decimal(rsa_decimal_value, input) == false)
+        const gmp::Mpz rsa_decimal_value = rsa.english_to_decimal(input);
+        if (rsa_decimal_value.isEmpty()) {
+            cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
-
+        }
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         gmp::Mpz ciphertext;
         rsa.encrypt(rsa_decimal_value, ciphertext);
@@ -53,10 +55,7 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
-        string decoded;
-        rsa.decimal_to_english(plaintext, decoded, 1024);
-
-        cout << "Decoded plaintext = " << decoded;
+        cout << "Decoded plaintext = " << CryptoBase::decimal_to_english(plaintext, 1024);
         return 0;
     }
     //elgamal method
@@ -68,9 +67,11 @@ int main(int argc, char** argv) {
 
         cout << "Plaintext message = " << input << "\n\n";
 
-        gmp::Mpz elgamal_decimal_value;
-        elgamal.english_to_decimal(elgamal_decimal_value, input);
-
+        const gmp::Mpz elgamal_decimal_value = elgamal.english_to_decimal(input);
+        if (elgamal_decimal_value.isEmpty()) {
+            cout << "Failed to encode the word! Can't encrypt\n";
+            return -1;
+        }
         //κρυπτογράφηση
         gmp::Mpz c1, c2;
         elgamal.encrypt(elgamal_decimal_value,c1, c2);
@@ -92,10 +93,7 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
-        string decoded;
-        elgamal.decimal_to_english(decrypted, decoded, 200);
-
-        cout << "Decoded plaintext = " << decoded;
+        cout << "Decoded plaintext = " << CryptoBase::decimal_to_english(decrypted, 200);
 
         return 0;
     }
@@ -108,9 +106,11 @@ int main(int argc, char** argv) {
         rabin.print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
-        gmp::Mpz rabin_decimal_value;
-        rabin.english_to_decimal(rabin_decimal_value, input);
-
+        const gmp::Mpz rabin_decimal_value = rabin.english_to_decimal(input);
+        if (rabin_decimal_value.isEmpty()) {
+            cout << "Failed to encode the word! Can't encrypt\n";
+            return -1;
+        }
         //κρυπτογράφηση
         gmp::Mpz ciphertext;
         rabin.encrypt(rabin_decimal_value, ciphertext);
@@ -154,16 +154,12 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //τώρα πρέπει να βρούμε ποιό από τα 4 είναι το σωστό
-        gmp::Mpz correct_plaintext;
-        if (!rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n, correct_plaintext))
+        gmp::Mpz correct_plaintext = rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
+        if (correct_plaintext()->_mp_size == 0)
             return -1;
 
-        //decode το plaintext και τέλος
-        string decoded_word;
-        rabin.decimal_to_english(correct_plaintext, decoded_word, 1024);
-
-        //εκτύπωση του plaintext
-        cout << "Decrypted and decoded (no redundancy) plaintext: " << decoded_word;
+        //decode το plaintext
+        cout << "Decrypted and decoded (no redundancy) plaintext: " << CryptoBase::decimal_to_english(correct_plaintext, 1024);
         return 0;
     }
 

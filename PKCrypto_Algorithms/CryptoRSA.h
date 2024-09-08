@@ -12,13 +12,13 @@ public:
 	//υπολογισμος των p,q,n + υπολογισμός του φ(n) = φ(p)φ(q) = (p-1)(q-1), λόγω ότι p,q είναι primes
 	void initialize_parameters() override;
 	//εκτυπωση
-	void print_parameters() override;
-	void print_private_key();
+	void print_parameters() const override;
+	void print_private_key() const;
 
 	//συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη (αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1)
-	unsigned int e_euclid();
+	void e_euclid();
 
-	void encrypt(const gmp::Mpz &input, gmp::Mpz &output);
-	void decrypt(gmp::Mpz &output, const gmp::Mpz &input);
+	void encrypt(const gmp::Mpz &input, gmp::Mpz &output) const;
+	void decrypt(gmp::Mpz &output, const gmp::Mpz &input) const;
 };
 

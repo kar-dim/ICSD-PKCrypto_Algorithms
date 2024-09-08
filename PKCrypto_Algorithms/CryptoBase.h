@@ -13,10 +13,10 @@ protected:
 	static int get_digit(const int num, const int n);
 public:
 	CryptoBase();
-	~CryptoBase();
+	virtual ~CryptoBase();
 	virtual void initialize_parameters() = 0;
-	virtual void print_parameters() = 0;
-	virtual bool english_to_decimal(gmp::Mpz& number, const std::string& word);
-	bool decimal_to_english(gmp::Mpz &number, std::string& final_chars, const int max_bits);
+	virtual void print_parameters() const = 0;
+	virtual gmp::Mpz english_to_decimal(const std::string& word) const;
+	static std::string decimal_to_english(gmp::Mpz &number, const int max_bits);
 };
 

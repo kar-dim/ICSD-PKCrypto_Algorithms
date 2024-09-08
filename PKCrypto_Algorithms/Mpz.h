@@ -12,12 +12,13 @@ namespace gmp {
 		Mpz();
 		Mpz(const ulong);
 		Mpz(const Mpz& a);
-		Mpz(const Mpz&& a) = delete;
 		~Mpz();
 
 		auto inline get() const { return _value; }
 		auto inline operator()() const { return get(); }
 		Mpz& operator=(const Mpz& t) { mpz_set(_value, t()); return *this; }
+
+		bool isEmpty() const;
 
 		int sprintf(char*, const char*) const;
 		int sscanf(const char*, const char*);

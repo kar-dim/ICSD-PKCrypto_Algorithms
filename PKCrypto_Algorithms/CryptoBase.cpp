@@ -1,12 +1,15 @@
 ﻿#include "CryptoBase.h"
+#include "Mpz.h"
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
 #include <memory>
 #include <string>
-#include <iostream>
-#include <cstring>
-#include <cmath>
-#include "Mpz.h"
 
 using std::cout;
+using std::string;
 
 CryptoBase::CryptoBase() {
     gmp_randinit_default(state); //αρχικοποίηση του random state
@@ -40,16 +43,17 @@ int CryptoBase::get_digit(const int num, const int n) {
 }
 
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
-bool CryptoBase::english_to_decimal(gmp::Mpz &number, const std::string &word) {
+gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
+    gmp::Mpz number;
     auto size = word.length();
-    std::string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
+    string characters_as_numbers = ""; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
     for (int i = 0; i < size; i++) {
         //παίρνουμε τη ASCII μορφή του χαρακτήρα
         int temp = (int)word[i];
         int num_of_digits = CryptoBase::number_of_digits(temp);
         if (num_of_digits <= 1 || num_of_digits > 3) {
             cout << "Not an English word, can't encrypt it!\n";
-            return false;
+            return number;
         }
         //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
         characters_as_numbers += num_of_digits == 2 ? '0' : (get_digit(temp, 2) + '0');
@@ -58,26 +62,24 @@ bool CryptoBase::english_to_decimal(gmp::Mpz &number, const std::string &word) {
     }
     cout << "Encoded characters: " << characters_as_numbers << "\n\n";
     //store σε GNU MP array
-    if (number.Mpz_set_str(characters_as_numbers.c_str()) == -1) {
-        cout << "Failed to encode the word! Can't encrypt\n";
-        return false;
-    }
-    return true;
+    number.Mpz_set_str(characters_as_numbers.c_str());
+    return number;
 }
 
-bool CryptoBase::decimal_to_english(gmp::Mpz& number, std::string &final_chars, const int max_bits) {
+string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bits) {
     std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(temp.get(), "%Zd", number);
     //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα
-    if (size < 1) {
+    if (size < 1 || size % 3 != 0) {
         cout << "Could not read the number!\n";
-        return false;
+        return "";
     }
+    string decoded_output;
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
         std::memcpy(temp_buf, &temp[i * 3], 3);
-        final_chars += atoi(temp_buf);
+        decoded_output += std::atoi(temp_buf);
     }
-    return true;
+    return decoded_output;
 }
 
