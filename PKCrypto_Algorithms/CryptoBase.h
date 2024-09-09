@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Mpz.h"
 #include <gmp.h>
 #include <string>
-#include "Mpz.h"
 
 class CryptoBase
 {

@@ -4,7 +4,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <format>
 
 using std::cout;
 using std::string;
@@ -43,13 +42,10 @@ void CryptoRabin::print_parameters() const {
 gmp::Mpz CryptoRabin::english_to_decimal(const string &word) const {
     gmp::Mpz number;
     string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    if (characters_as_numbers.empty()) {
-        cout << "Not an English letter found, can't encode!\n";
+    if (characters_as_numbers.empty())
         return number;
-    }
     //padding
     characters_as_numbers += "111111111111";
-    cout << "Encoded characters (plus redundancy): " << characters_as_numbers << "\n\n";
     number.Mpz_set_str(characters_as_numbers.c_str());
     return number;
 }
@@ -186,10 +182,8 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
     int size_my = my_mod_n.sprintf(my_chars.get(), "%Zd");
 
     //αν κάποιο δε διαβάστηκε σωστά τότε οι παραμέτροι είναι λάθος
-    if (size_x < 0 || size_y < 0 || size_mx < 0 || size_my < 0) {
-        cout << "Could not read some or all of the possible plaintexts!\n\n";
-        return false;
-    }
+    if (size_x < 0 || size_y < 0 || size_mx < 0 || size_my < 0)
+        return gmp::Mpz();
 
     //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
     //και επιστρέφουμε το plaintext
@@ -198,10 +192,8 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
     bool is_mx = check_plaintext_chars(mx_chars, size_mx);
     bool is_my = check_plaintext_chars(my_chars, size_my);
 
-    if (is_x == false && is_y == false && is_mx == false && is_my == false) {
-        cout << "Wrong parameters! None of the four plaintexts are correct\n\n";
+    if (is_x == false && is_y == false && is_mx == false && is_my == false)
         return gmp::Mpz();
-    }
 
     string buf;
     check_and_retrieve_plaintext(is_x, x_chars, size_x, buf);

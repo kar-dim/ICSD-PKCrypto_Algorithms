@@ -1,10 +1,10 @@
 ﻿#include "CryptoBase.h"
-#include "CryptoRSA.h"
 #include "CryptoElGamal.h"
 #include "CryptoRabin.h"
-#include <string>
-#include <iostream>
+#include "CryptoRSA.h"
 #include "Mpz.h"
+#include <iostream>
+#include <string>
 
 using std::cout;
 using std::string;
@@ -37,6 +37,10 @@ int main(int argc, char** argv) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
+        cout << "Encoded characters = ";
+        rsa_decimal_value.Mpz_out_str();
+        cout << "\n\n";
+
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         gmp::Mpz ciphertext;
         rsa.encrypt(rsa_decimal_value, ciphertext);
@@ -55,7 +59,12 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
-        cout << "Decoded plaintext = " << CryptoBase::decimal_to_english(plaintext, 1024);
+        string decoded = CryptoBase::decimal_to_english(plaintext, 1024);
+        if (decoded.empty()) {
+            cout << "Could not decode the number!\n";
+            return -1;
+        }
+        cout << "Decoded plaintext = " << decoded;
         return 0;
     }
     //elgamal method
@@ -72,6 +81,10 @@ int main(int argc, char** argv) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
+        cout << "Encoded characters = ";
+        elgamal_decimal_value.Mpz_out_str();
+        cout << "\n\n";
+
         //κρυπτογράφηση
         gmp::Mpz c1, c2;
         elgamal.encrypt(elgamal_decimal_value,c1, c2);
@@ -93,8 +106,12 @@ int main(int argc, char** argv) {
         cout << "\n\n";
 
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
-        cout << "Decoded plaintext = " << CryptoBase::decimal_to_english(decrypted, 200);
-
+        string decoded = CryptoBase::decimal_to_english(decrypted, 200);
+        if (decoded.empty()) {
+            cout << "Could not decode the number!\n";
+            return -1;
+        }
+        cout << "Decoded plaintext = " << decoded;
         return 0;
     }
 
@@ -111,6 +128,10 @@ int main(int argc, char** argv) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
+        cout << "Encoded characters (plus redundancy) = ";
+        rabin_decimal_value.Mpz_out_str();
+        cout << "\n\n";
+
         //κρυπτογράφηση
         gmp::Mpz ciphertext;
         rabin.encrypt(rabin_decimal_value, ciphertext);
@@ -143,23 +164,29 @@ int main(int argc, char** argv) {
         rabin.calculate_four_candidates(ciphertext, a, b, x, mx_mod_n, y, my_mod_n);
 
         //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
-        cout << "1)x = ";
+        cout << "1) x = ";
         x.Mpz_out_str();
-        cout << "\n\n2)y = ";
+        cout << "\n\n2) y = ";
         y.Mpz_out_str();
-        cout << "\n\n3)-x MOD n = ";
+        cout << "\n\n3) -x MOD n = ";
         mx_mod_n.Mpz_out_str();
-        cout << "\n\n3)-y MOD n = ";
+        cout << "\n\n4) -y MOD n = ";
         my_mod_n.Mpz_out_str();
         cout << "\n\n";
 
         //τώρα πρέπει να βρούμε ποιό από τα 4 είναι το σωστό
         gmp::Mpz correct_plaintext = rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
-        if (correct_plaintext()->_mp_size == 0)
+        if (correct_plaintext.isEmpty()) {
+            cout << "Could not decrypt, none of the plaintext are correct";
             return -1;
-
+        }
         //decode το plaintext
-        cout << "Decrypted and decoded (no redundancy) plaintext: " << CryptoBase::decimal_to_english(correct_plaintext, 1024);
+        string decoded = CryptoBase::decimal_to_english(correct_plaintext, 1024);
+        if (decoded.empty()) {
+            cout << "Could not decode the number!\n";
+            return -1;
+        }
+        cout << "Decrypted and decoded (no redundancy) plaintext = " << decoded;
         return 0;
     }
 

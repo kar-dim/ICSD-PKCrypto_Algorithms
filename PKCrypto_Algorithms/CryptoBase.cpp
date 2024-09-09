@@ -4,12 +4,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <iostream>
+#include <format>
 #include <memory>
 #include <string>
-#include <format>
 
-using std::cout;
 using std::string;
 
 CryptoBase::CryptoBase() {
@@ -61,11 +59,8 @@ string CryptoBase::english_to_decimal_str(const string& word) const {
 gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
     gmp::Mpz number;
     string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    if (characters_as_numbers.empty()) {
-        cout << "Not an English letter found, can't encode!\n";
+    if (characters_as_numbers.empty())
         return number;
-    }
-    cout << "Encoded characters: " << characters_as_numbers << "\n\n";
     //store σε GNU MP array
     number.Mpz_set_str(characters_as_numbers.c_str());
     return number;
@@ -75,10 +70,8 @@ string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bits) {
     std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(temp.get(), "%Zd", number);
     //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα
-    if (size < 1 || size % 3 != 0) {
-        cout << "Could not read the number!\n";
+    if (size < 1 || size % 3 != 0)
         return "";
-    }
     string decoded_output;
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
