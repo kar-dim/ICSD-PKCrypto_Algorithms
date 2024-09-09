@@ -66,16 +66,21 @@ gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
     return number;
 }
 
-string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bits) {
-    std::unique_ptr<char[]> temp(new char[max_bits]);//200 για elgamal, 1024 για rabin/rsa
-    int size = gmp_sprintf(temp.get(), "%Zd", number);
-    //size είναι ο αριθμός των χαρακτήρων που διαβάστηκαν, αν δε διαβάστηκε τίποτα τότε σφάλμα
-    if (size < 1 || size % 3 != 0)
-        return "";
+string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bytes) {
+    std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
+    int size = gmp_sprintf(number_buff.get(), "%Zd", number);
+
+    //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
+    if (number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9')) {
+        std::memcpy(number_buff.get() + 1, number_buff.get(), size);
+        number_buff[0] = '0';
+        number_buff[++size] = '\0';
+    }
+        
     string decoded_output;
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
-        std::memcpy(temp_buf, &temp[i * 3], 3);
+        std::memcpy(temp_buf, &number_buff[i * 3], 3);
         decoded_output += std::atoi(temp_buf);
     }
     return decoded_output;
