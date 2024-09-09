@@ -5,10 +5,10 @@
 using std::cout;
 
 void CryptoElGamal::initialize_parameters() {
-    //p: random 200 bit prime
+    //p: random prime
     while (true) {
         //δημιουργία του p
-        p.Mpz_urandomb(state, 200);
+        p.Mpz_urandomb(state, key_size);
         if (p.Mpz_probab_prime_p(30) >= 1)
             break;
     }
@@ -24,7 +24,7 @@ void CryptoElGamal::initialize_parameters() {
     gmp::Mpz p_minus_two;
     p_minus_two.Mpz_sub_ui(p, 2); //p-2
     while (true) {
-        a.Mpz_urandomb(state, 200);
+        a.Mpz_urandomb(state, key_size);
         if (a.Mpz_cmp(p_minus_two) <= 0) {
             break;
         }
@@ -46,13 +46,15 @@ void CryptoElGamal::print_parameters() const {
     cout << "\n\n";
 }
 
-void CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) {
+bool CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) {
+    if (input.size_in_bits() >= key_size)
+        return false;
     //δημιουργια του k, 1<=k<=p-2
     gmp::Mpz k, p_minus_two;
     p_minus_two.Mpz_sub_ui(p, 2);
 
     while (true) {
-        k.Mpz_urandomb(state, 200);
+        k.Mpz_urandomb(state, key_size);
         //έλεγχος αν k>=1 και k<=p-2, αν ναι τοτε break
         if (k.Mpz_cmp(p_minus_two) <= 0 && k.Mpz_cmp_ui(1) >= 0)
             break;
@@ -74,6 +76,7 @@ void CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) 
     intermediate.Mpz_mul(plaintext_mod_p, public_key_mod_p); //intermediate το γινόμενο
     //c2 = intermediate MOD p
     c2.Mpz_mod(intermediate, p);
+    return true;
 }
 
 void CryptoElGamal::decrypt(const gmp::Mpz &c1, const gmp::Mpz &c2, gmp::Mpz &plaintext) const {

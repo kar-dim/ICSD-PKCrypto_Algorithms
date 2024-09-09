@@ -6,7 +6,7 @@
 using std::cout;
 
 CryptoRSA::CryptoRSA(): CryptoBase() {
-    e.Mpz_set_ui(65537);
+    e.Mpz_set_ui(e_value);
 }
 
 void CryptoRSA::print_parameters() const {
@@ -28,11 +28,11 @@ void CryptoRSA::print_private_key() const {
 }
 
 void CryptoRSA::initialize_parameters() {
-    //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime 512bits
+    //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
     while (true) {
         //δημιουργία των δυο τυχαίων
-        p.Mpz_urandomb(state, 512);
-        q.Mpz_urandomb(state, 512);
+        p.Mpz_urandomb(state, key_size);
+        q.Mpz_urandomb(state, key_size);
         if (p.Mpz_probab_prime_p(30) >= 1 && q.Mpz_probab_prime_p(30) >= 1) {
             break;
         }
@@ -53,23 +53,22 @@ void CryptoRSA::initialize_parameters() {
 
 //συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη
 //βρίσκει τον αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1
-void CryptoRSA::e_euclid() {
-    gmp::Mpz t, q, totient_copy, q_mul_p0;
-    gmp::Mpz p0(0), p1(1);
-    gmp::Mpz m0(totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
+bool CryptoRSA::e_euclid() {
+    gmp::Mpz t, q, q_mul_p0;
+    gmp::Mpz e_copy(e), p0(0), p1(1);
+    const gmp::Mpz m0(totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
 
     //περίπτωση όπου a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
     if (totient.Mpz_cmp_ui(1) == 0)
-        return;
+        return false;
 
     //επαναληπτικά μέχρι να μη μπορεί να μειωθεί και άλλο το a
-    while (e.Mpz_cmp_ui(1) > 0) {
-        q.Mpz_fdiv_q(e, totient); //q= αποτέλεσμα διαίρεσης
+    while (e_copy.Mpz_cmp_ui(1) > 0) {
+        q.Mpz_fdiv_q(e_copy, totient); //q= αποτέλεσμα διαίρεσης
         t = totient;
 
-        totient_copy = totient; 
-        totient.Mpz_mod(e, totient_copy);
-        e = t; 
+        totient.Mpz_mod(e_copy, totient);
+        e_copy = t;
 
         //pi =p(i-2) - p(i-1) q(i-2)(mod n), pi είναι το p1, το p(i-2) είναι το t και p(i-1) είναι το p0
         t = p0;
@@ -82,18 +81,18 @@ void CryptoRSA::e_euclid() {
     }
     //αν ο inverse είναι αρνητικός τον κάνουμε θετικό κατά m0 = το αρχικό m για να οριζεται στο (0, m-1)
     if (p1.Mpz_cmp_ui(0) < 0) {
-        gmp::Mpz copy_p1(p1);
-        p1.Mpz_add(copy_p1, m0);
+        p1.Mpz_add(p1, m0);
     }
     //d=p1, το private key είναι ο inverse
     d = p1;
-    return;
+    return true;
 }
 
-void CryptoRSA::encrypt(const gmp::Mpz &rsa_decimal_value, gmp::Mpz &ciphertext) const {
-    gmp::Mpz m_to_e;
-    m_to_e.Mpz_pow_ui(rsa_decimal_value, 65537);
-    ciphertext.Mpz_mod(m_to_e, n);
+bool CryptoRSA::encrypt(const gmp::Mpz &rsa_decimal_value, gmp::Mpz &ciphertext) const {
+    if (rsa_decimal_value.size_in_bits() >= 2 * key_size)
+        return false;
+    ciphertext.Mpz_powm(rsa_decimal_value, e, n);
+    return true;
 }
 
 void CryptoRSA::decrypt(gmp::Mpz &plaintext, const gmp::Mpz &ciphertext) const {

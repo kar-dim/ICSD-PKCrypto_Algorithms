@@ -17,8 +17,13 @@ gmp::Mpz::~Mpz() {
 	mpz_clear(_value);
 }
 
-bool gmp::Mpz::isEmpty() const {
+bool gmp::Mpz::is_empty() const {
 	return _value[0]._mp_alloc == 0;
+}
+
+std::size_t gmp::Mpz::size_in_bits() const
+{
+	return mpz_sizeinbase(_value, 2);
 }
 
 int gmp::Mpz::sprintf(char* a, const char* b) const {

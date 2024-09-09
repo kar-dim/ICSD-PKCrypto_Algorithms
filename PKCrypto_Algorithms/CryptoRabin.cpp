@@ -12,9 +12,9 @@ void CryptoRabin::initialize_parameters() {
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
     gmp::Mpz temp_p, temp_q;
     while (true) {
-        //δημιουργία των δυο τυχαίων μεγέθους 200bits
-        p.Mpz_urandomb(state, 200);
-        q.Mpz_urandomb(state, 200);
+        //δημιουργία των δυο τυχαίων
+        p.Mpz_urandomb(state, key_size);
+        q.Mpz_urandomb(state, key_size);
         //έλεγχος αν είναι prime, αν είναι τότε ελέγχουμε και την επιπλέον συνθήκη, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
         if (p.Mpz_probab_prime_p(30) >= 1 && q.Mpz_probab_prime_p(30) >= 1) {
             temp_p.Mpz_mod_ui(p, 4);
@@ -50,7 +50,9 @@ gmp::Mpz CryptoRabin::english_to_decimal(const string &word) const {
     return number;
 }
 
-void CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) const {
+bool CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) const {
+    if (plaintext.size_in_bits() >= key_size)
+        return false;
     ciphertext.Mpz_powm_ui(plaintext, 2, n);
 }
 
@@ -170,11 +172,12 @@ void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std:
 
 //εύρεση του σωστού plaintext
 gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n) const {
-    //200*200bits max = 400 bits
-    std::unique_ptr<char[]>x_chars(new char[400]);
-    std::unique_ptr<char[]>y_chars(new char[400]);
-    std::unique_ptr<char[]>mx_chars(new char[400]);
-    std::unique_ptr<char[]>my_chars(new char[400]);
+    //x*x max = 2x bits
+    const int max_size = key_size * 2;
+    std::unique_ptr<char[]>x_chars(new char[max_size]);
+    std::unique_ptr<char[]>y_chars(new char[max_size]);
+    std::unique_ptr<char[]>mx_chars(new char[max_size]);
+    std::unique_ptr<char[]>my_chars(new char[max_size]);
     //κάνουμε "dump" στους buffer arrays τους αριθμούς
     int size_x = x.sprintf(x_chars.get(), "%Zd");
     int size_y = y.sprintf(y_chars.get(), "%Zd");
@@ -187,10 +190,10 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
 
     //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
     //και επιστρέφουμε το plaintext
-    bool is_x = check_plaintext_chars(x_chars, size_x);
-    bool is_y = check_plaintext_chars(y_chars, size_y);
-    bool is_mx = check_plaintext_chars(mx_chars, size_mx);
-    bool is_my = check_plaintext_chars(my_chars, size_my);
+    const bool is_x = check_plaintext_chars(x_chars, size_x);
+    const bool is_y = check_plaintext_chars(y_chars, size_y);
+    const bool is_mx = check_plaintext_chars(mx_chars, size_mx);
+    const bool is_my = check_plaintext_chars(my_chars, size_my);
 
     if (is_x == false && is_y == false && is_mx == false && is_my == false)
         return gmp::Mpz();

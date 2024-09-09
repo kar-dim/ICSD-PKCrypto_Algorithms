@@ -18,8 +18,8 @@ namespace gmp {
 		auto inline operator()() const { return get(); }
 		Mpz& operator=(const Mpz& t) { mpz_set(_value, t()); return *this; }
 
-		bool isEmpty() const;
-
+		bool is_empty() const;
+		std::size_t size_in_bits() const;
 		int sprintf(char*, const char*) const;
 		int sscanf(const char*, const char*) const;
 

@@ -23,17 +23,18 @@ int main(int argc, char** argv) {
         CryptoRSA rsa;
 
         //αρχικοποιηση RSA παραμετρων p,q n και totient (phi)
-        rsa.initialize_parameters();
-        rsa.print_parameters();
-
         //private key: (d,n) όπου d βρίσκεται ως: e*d = 1 mod (φ(n)) μεσω του αλγοριθμου του Ευκλειδη
-        rsa.e_euclid();
+        do {
+            rsa.initialize_parameters();
+        } while (!rsa.e_euclid());
+        
+        rsa.print_parameters();
         rsa.print_private_key();
 
         cout << "Plaintext message = " << input << "\n\n";
 
         const gmp::Mpz rsa_decimal_value = rsa.english_to_decimal(input);
-        if (rsa_decimal_value.isEmpty()) {
+        if (rsa_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
@@ -43,7 +44,10 @@ int main(int argc, char** argv) {
 
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         gmp::Mpz ciphertext;
-        rsa.encrypt(rsa_decimal_value, ciphertext);
+        if (!rsa.encrypt(rsa_decimal_value, ciphertext)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << (CryptoRSA::key_size * 2) - 1 << " bits, input size is: " << rsa_decimal_value.size_in_bits() << " bits\n";
+            return -1;
+        }
 
         cout << "Encrypted Ciphertext = ";
         ciphertext.Mpz_out_str();
@@ -77,7 +81,7 @@ int main(int argc, char** argv) {
         cout << "Plaintext message = " << input << "\n\n";
 
         const gmp::Mpz elgamal_decimal_value = elgamal.english_to_decimal(input);
-        if (elgamal_decimal_value.isEmpty()) {
+        if (elgamal_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
@@ -87,7 +91,10 @@ int main(int argc, char** argv) {
 
         //κρυπτογράφηση
         gmp::Mpz c1, c2;
-        elgamal.encrypt(elgamal_decimal_value,c1, c2);
+        if (!elgamal.encrypt(elgamal_decimal_value, c1, c2)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << CryptoElGamal::key_size - 1 << " bits, input size is: " << elgamal_decimal_value.size_in_bits() << " bits\n";
+            return -1;
+        }
 
         //εκτύπωση των δύο ciphertext
         cout << "Encrypted Ciphertext c1 = ";
@@ -124,17 +131,21 @@ int main(int argc, char** argv) {
 
         cout << "Plaintext message = " << input << "\n\n";
         const gmp::Mpz rabin_decimal_value = rabin.english_to_decimal(input);
-        if (rabin_decimal_value.isEmpty()) {
+        if (rabin_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
         }
+
         cout << "Encoded characters (plus redundancy) = ";
         rabin_decimal_value.Mpz_out_str();
         cout << "\n\n";
 
         //κρυπτογράφηση
         gmp::Mpz ciphertext;
-        rabin.encrypt(rabin_decimal_value, ciphertext);
+        if (!rabin.encrypt(rabin_decimal_value, ciphertext)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << (CryptoRabin::key_size) - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
+            //return -1;
+        }
         cout << "Encrypted Ciphertext = ";
         ciphertext.Mpz_out_str();
         cout << "\n\n";
@@ -176,7 +187,7 @@ int main(int argc, char** argv) {
 
         //τώρα πρέπει να βρούμε ποιό από τα 4 είναι το σωστό
         gmp::Mpz correct_plaintext = rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
-        if (correct_plaintext.isEmpty()) {
+        if (correct_plaintext.is_empty()) {
             cout << "Could not decrypt, none of the plaintext are correct";
             return -1;
         }
