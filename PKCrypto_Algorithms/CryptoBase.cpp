@@ -69,11 +69,13 @@ gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
 }
 
 string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bytes) {
-    std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
+    const std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(number_buff.get(), "%Zd", number);
-    assert(size < max_bytes);
+    const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
+    if (size > max_bytes || (should_pad && size + 1 > max_bytes))
+        return "";
     //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
-    if (number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9')) {
+    if (should_pad) {
         std::memcpy(number_buff.get() + 1, number_buff.get(), size);
         number_buff[0] = '0';
         number_buff[++size] = '\0';

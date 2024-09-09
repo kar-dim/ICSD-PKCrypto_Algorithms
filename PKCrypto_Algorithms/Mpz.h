@@ -21,7 +21,7 @@ namespace gmp {
 		bool isEmpty() const;
 
 		int sprintf(char*, const char*) const;
-		int sscanf(const char*, const char*);
+		int sscanf(const char*, const char*) const;
 
 		void Mpz_urandomb(gmp_randstate_t, mp_bitcnt_t);
 		int Mpz_probab_prime_p(const int num) const;

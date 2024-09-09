@@ -25,7 +25,7 @@ int gmp::Mpz::sprintf(char* a, const char* b) const {
 	return gmp_sprintf(a, b, _value);
 }
 
-int gmp::Mpz::sscanf(const char* a, const char* b) {
+int gmp::Mpz::sscanf(const char* a, const char* b) const {
 	return gmp_sscanf(a, b, _value);
 }
 
