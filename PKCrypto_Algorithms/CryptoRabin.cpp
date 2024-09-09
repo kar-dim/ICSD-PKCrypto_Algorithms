@@ -54,6 +54,7 @@ bool CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) const
     if (plaintext.size_in_bits() >= key_size)
         return false;
     ciphertext.Mpz_powm_ui(plaintext, 2, n);
+    return true;
 }
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1

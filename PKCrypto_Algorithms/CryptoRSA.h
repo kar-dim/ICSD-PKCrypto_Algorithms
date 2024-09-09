@@ -7,7 +7,6 @@ class CryptoRSA : public CryptoBase
 private:
 	gmp::Mpz p, q, n, e, d, totient;
 	static constexpr int e_value = 65537;
-	
 public:
 	static constexpr size_t key_size = 512;
 	CryptoRSA();

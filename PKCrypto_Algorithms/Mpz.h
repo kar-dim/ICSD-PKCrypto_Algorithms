@@ -10,13 +10,14 @@ namespace gmp {
 		mpz_t _value;
 	public:
 		Mpz();
-		Mpz(const ulong);
+		explicit Mpz(const ulong);
 		Mpz(const Mpz& other);
 		~Mpz();
+		Mpz(Mpz&& other) noexcept;
 
-		auto inline get() const { return _value; }
-		auto inline operator()() const { return get(); }
-		Mpz& operator=(const Mpz& t) { mpz_set(_value, t()); return *this; }
+		const mpz_t& operator()() const;
+		Mpz& operator=(const Mpz& other);
+		Mpz& operator=(Mpz&& other) noexcept;
 
 		bool is_empty() const;
 		std::size_t size_in_bits() const;
