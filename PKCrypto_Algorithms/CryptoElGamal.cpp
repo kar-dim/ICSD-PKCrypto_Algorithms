@@ -76,7 +76,7 @@ void CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) 
     c2.Mpz_mod(intermediate, p);
 }
 
-void CryptoElGamal::decrypt(const gmp::Mpz &c1, const gmp::Mpz &c2, gmp::Mpz &plaintext) {
+void CryptoElGamal::decrypt(const gmp::Mpz &c1, const gmp::Mpz &c2, gmp::Mpz &plaintext) const {
     gmp::Mpz intermediate, exponential, temp;
 
     //p-1-private
