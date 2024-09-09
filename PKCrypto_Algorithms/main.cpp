@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
         gmp::Mpz ciphertext;
         if (!rabin.encrypt(rabin_decimal_value, ciphertext)) {
             cout << "Failed to encrypt! Maximum allowed input size is: " << (CryptoRabin::key_size) - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
-            //return -1;
+            return -1;
         }
         cout << "Encrypted Ciphertext = ";
         ciphertext.Mpz_out_str();
