@@ -18,6 +18,6 @@ public:
 	virtual void initialize_parameters() = 0;
 	virtual void print_parameters() const = 0;
 	virtual gmp::Mpz english_to_decimal(const std::string& word) const;
-	static std::string decimal_to_english(gmp::Mpz &number, const int max_bits);
+	static std::string decimal_to_english(gmp::Mpz &number, const int max_bytes);
 };
 
