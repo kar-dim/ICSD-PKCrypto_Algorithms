@@ -5,6 +5,7 @@
 #include <cstring>
 #include <ctime>
 #include <format>
+#include <gmp.h>
 #include <memory>
 #include <string>
 
