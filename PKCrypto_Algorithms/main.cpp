@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
         } while (!rsa.e_euclid());
         
         rsa.print_parameters();
-        rsa.print_private_key();
 
         cout << "Plaintext message = " << input << "\n\n";
 

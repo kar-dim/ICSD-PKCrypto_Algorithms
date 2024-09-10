@@ -8,7 +8,6 @@
 #include <gmp.h>
 #include <memory>
 #include <string>
-#include <cassert>
 
 using std::string;
 

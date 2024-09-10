@@ -15,7 +15,6 @@ public:
 	void initialize_parameters() override;
 	//εκτυπωση
 	void print_parameters() const override;
-	void print_private_key() const;
 
 	//συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη (αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1)
 	bool e_euclid();

@@ -19,9 +19,6 @@ void CryptoRSA::print_parameters() const {
     cout << "\n\nphi = ";
     totient.Mpz_out_str();
     cout << "\n\nPublic key is n and e = 65537\n\n";
-}
-
-void CryptoRSA::print_private_key() const {
     cout << "private key = ";
     d.Mpz_out_str();
     cout << "\n\n";
