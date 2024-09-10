@@ -55,7 +55,7 @@ void CryptoRSA::initialize_parameters() {
 //βρίσκει τον αντίστροφο του a mod m, δηλαδή a*p1 == 1(mod m) -> a*p1 = km + 1
 bool CryptoRSA::e_euclid() {
     gmp::Mpz t, q, q_mul_p0;
-    gmp::Mpz e_copy(e), p0(0), p1(1);
+    gmp::Mpz e_copy(e), p0(0), p1(1), totient_copy(totient);
     const gmp::Mpz m0(totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
 
     //περίπτωση όπου a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
@@ -64,10 +64,10 @@ bool CryptoRSA::e_euclid() {
 
     //επαναληπτικά μέχρι να μη μπορεί να μειωθεί και άλλο το a
     while (e_copy.Mpz_cmp_ui(1) > 0) {
-        q.Mpz_fdiv_q(e_copy, totient); //q= αποτέλεσμα διαίρεσης
-        t = totient;
+        q.Mpz_fdiv_q(e_copy, totient_copy); //q= αποτέλεσμα διαίρεσης
+        t = totient_copy;
 
-        totient.Mpz_mod(e_copy, totient);
+        totient_copy.Mpz_mod(e_copy, totient_copy);
         e_copy = t;
 
         //pi =p(i-2) - p(i-1) q(i-2)(mod n), pi είναι το p1, το p(i-2) είναι το t και p(i-1) είναι το p0
