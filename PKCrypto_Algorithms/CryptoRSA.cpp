@@ -82,6 +82,8 @@ bool CryptoRSA::encrypt(const gmp::Mpz &rsa_decimal_value, gmp::Mpz &ciphertext)
     return true;
 }
 
-void CryptoRSA::decrypt(gmp::Mpz &plaintext, const gmp::Mpz &ciphertext) const {
+gmp::Mpz CryptoRSA::decrypt(const gmp::Mpz &ciphertext) const {
+    gmp::Mpz plaintext;
     plaintext.Mpz_powm(ciphertext, d, n);
+    return plaintext;
 }

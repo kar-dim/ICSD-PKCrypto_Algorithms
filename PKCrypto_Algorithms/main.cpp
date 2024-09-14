@@ -45,8 +45,8 @@ int main(int argc, char** argv) {
         cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";
 
         //decrypt, m = c^d MOD n, c=ciphertext, d=private key, m=plaintext
-        gmp::Mpz plaintext;
-        rsa.decrypt(plaintext, ciphertext);
+        gmp::Mpz plaintext = rsa.decrypt(ciphertext);
+        
         //εκτύπωση του plaintext, πρέπει να είναι ακριβώς ίδιο με το (encoded) μήνυμα.
         cout << "Decrypted (and encoded) Plaintext = " << plaintext << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
@@ -83,8 +83,7 @@ int main(int argc, char** argv) {
         cout << "Encrypted Ciphertext c2 = " << c2 << "\n\n";
 
         //αποκρυπτογράφηση
-        gmp::Mpz decrypted;
-        elgamal.decrypt(c1, c2, decrypted);
+        gmp::Mpz decrypted = elgamal.decrypt(c1, c2);
         //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = " << decrypted << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)

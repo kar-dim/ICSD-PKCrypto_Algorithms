@@ -13,6 +13,6 @@ public:
 	void initialize_parameters() override;
 	void print_parameters() const override;
 	bool encrypt(const gmp::Mpz &input, gmp::Mpz &ciphertext1, gmp::Mpz &ciphertext2);
-	void decrypt(const gmp::Mpz &ciphertext1, const gmp::Mpz &ciphertext2, gmp::Mpz &output_plaintext) const;
+	gmp::Mpz decrypt(const gmp::Mpz &ciphertext1, const gmp::Mpz &ciphertext2) const;
 };
 

@@ -20,6 +20,6 @@ public:
 	bool e_euclid();
 
 	bool encrypt(const gmp::Mpz &input, gmp::Mpz &output) const;
-	void decrypt(gmp::Mpz &output, const gmp::Mpz &input) const;
+	gmp::Mpz decrypt(const gmp::Mpz &input) const;
 };
 
