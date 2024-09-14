@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         //εκτύπωση του plaintext, πρέπει να είναι ακριβώς ίδιο με το (encoded) μήνυμα.
         cout << "Decrypted (and encoded) Plaintext = " << plaintext << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
-        string decoded = CryptoBase::decimal_to_english(plaintext, 1024);
+        string decoded = CryptoBase::decimal_to_english(plaintext);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = " << decrypted << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
-        string decoded = CryptoBase::decimal_to_english(decrypted, 200);
+        string decoded = CryptoBase::decimal_to_english(decrypted);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;
@@ -114,36 +114,13 @@ int main(int argc, char** argv) {
 
         //decrypt
         //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη
-        Mpz a, b, gcd_a_b;
-        rabin.e_euclid(a, b, gcd_a_b);
-        //εκτύπωση των a,b και του gcd(a,b)=1
-        cout << "a = " << a << "\n\n";
-        cout << "b = " << b << "\n\n";
-        cout << "d (MUST BE 1) = " << gcd_a_b << "\n\n";
-        //αν gcd(a,b) δεν είναι 1 τότε σφάλμα
-        if (gcd_a_b != 1) {
-            cout << "Error trying to initialize the decryption process! Exiting...";
-            return -1;
-        }
-
-        //ευρεση των 4 πιθανων plaintexts
-        Mpz x, y, mx_mod_n, my_mod_n;
-        //υπολογίζουμε τα r,s,x,y
-        rabin.calculate_four_candidates(ciphertext, a, b, x, mx_mod_n, y, my_mod_n);
-
-        //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
-        cout << "1) x = " << x << "\n\n";
-        cout << "2) y = " << y << "\n\n";
-        cout << "3) -x MOD n = " << mx_mod_n << "\n\n";
-        cout << "4) -y MOD n = " << my_mod_n <<"\n\n";
-        //βρίσκουμε ποιό από τα 4 είναι το σωστό
-        Mpz correct_plaintext = rabin.get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
-        if (correct_plaintext.is_empty()) {
-            cout << "Could not decrypt, none of the plaintext are correct";
+        Mpz plaintext = rabin.decrypt(ciphertext);
+        if (plaintext.is_empty()) {
+            cout << "Could not decrypt, error in initialization process or none of the plaintext are correct";
             return -1;
         }
         //decode το plaintext
-        string decoded = CryptoBase::decimal_to_english(correct_plaintext, 1024);
+        string decoded = CryptoBase::decimal_to_english(plaintext);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;

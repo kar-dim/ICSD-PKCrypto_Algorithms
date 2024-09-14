@@ -19,6 +19,6 @@ public:
 	virtual void print_parameters() const = 0;
 	virtual gmp::Mpz english_to_decimal(const std::string& word) const;
 	size_t get_public_key_size() const;
-	static std::string decimal_to_english(gmp::Mpz &number, const int max_bytes);
+	static std::string decimal_to_english(gmp::Mpz &number);
 };
 

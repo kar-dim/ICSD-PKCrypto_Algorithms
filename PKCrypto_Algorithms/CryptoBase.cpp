@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 
+#define MAX_PLAINTEXT_CHARS 2048
+
 using std::string;
 using gmp::Mpz;
 
@@ -71,15 +73,15 @@ size_t CryptoBase::get_public_key_size() const
     return public_key_size;
 }
 
-string CryptoBase::decimal_to_english(Mpz& number, const int max_bytes) {
-    const std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
-    int size = gmp_sprintf(number_buff.get(), "%Zd", number());
+string CryptoBase::decimal_to_english(Mpz& number) {
+    char number_buff[MAX_PLAINTEXT_CHARS] = { 0 };
+    int size = gmp_sprintf(number_buff, "%Zd", number());
     const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
-    if (size > max_bytes || (should_pad && size + 1 > max_bytes))
+    if (size > MAX_PLAINTEXT_CHARS || (should_pad && size + 1 > MAX_PLAINTEXT_CHARS))
         return "";
     //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
     if (should_pad) {
-        std::memcpy(number_buff.get() + 1, number_buff.get(), size);
+        std::memcpy(number_buff + 1, number_buff, size);
         number_buff[0] = '0';
         number_buff[++size] = '\0';
     }

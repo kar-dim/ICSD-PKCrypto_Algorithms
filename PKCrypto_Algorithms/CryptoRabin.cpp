@@ -44,6 +44,36 @@ bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz &ciphertext) const {
     return true;
 }
 
+Mpz CryptoRabin::decrypt(const Mpz& ciphertext) {
+    Mpz a, b, gcd_a_b;
+    e_euclid(a, b, gcd_a_b);
+    //εκτύπωση των a,b και του gcd(a,b)=1
+    cout << "a = " << a << "\n\n";
+    cout << "b = " << b << "\n\n";
+    cout << "d (MUST BE 1) = " << gcd_a_b << "\n\n";
+    //αν gcd(a,b) δεν είναι 1 τότε σφάλμα
+    if (gcd_a_b != 1) {
+        cout << "Error trying to initialize the decryption process! Exiting...";
+        return Mpz();
+    }
+
+    //ευρεση των 4 πιθανων plaintexts
+    Mpz x, y, mx_mod_n, my_mod_n;
+    //υπολογίζουμε τα r,s,x,y
+    calculate_four_candidates(ciphertext, a, b, x, mx_mod_n, y, my_mod_n);
+
+    //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
+    cout << "1) x = " << x << "\n\n";
+    cout << "2) y = " << y << "\n\n";
+    cout << "3) -x MOD n = " << mx_mod_n << "\n\n";
+    cout << "4) -y MOD n = " << my_mod_n << "\n\n";
+    //βρίσκουμε ποιό από τα 4 είναι το σωστό
+    Mpz correct_plaintext = get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
+    if (correct_plaintext.is_empty())
+        cout << "Could not decrypt, none of the plaintext are correct";
+    return correct_plaintext;
+}
+
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
 void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
