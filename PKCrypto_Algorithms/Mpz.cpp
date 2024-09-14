@@ -1,8 +1,10 @@
 #include "Mpz.h"
 #include <gmp.h>
 #include <ostream>
+#include <string>
 
-using gmp::Mpz;
+using namespace gmp;
+using std::string;
 
 Mpz::Mpz() {
 	mpz_init(_value);
@@ -10,6 +12,11 @@ Mpz::Mpz() {
 
 Mpz::Mpz(const ulong n) {
 	mpz_init_set_ui(_value, n);
+}
+
+Mpz::Mpz(const string str)
+{
+	mpz_init_set_str(_value, str.c_str(), 10);
 }
 
 Mpz::Mpz(const Mpz &other) {
@@ -36,11 +43,204 @@ Mpz& Mpz::operator=(Mpz&& other) noexcept {
 	return *this;
 }
 
+bool Mpz::operator==(const Mpz& other) const
+{
+	return mpz_cmp(this->_value, other._value) == 0;
+}
+
+bool Mpz::operator==(ulong n) const
+{
+	return mpz_cmp_ui(this->_value, n) == 0;
+}
+
+bool Mpz::operator!=(const Mpz& other) const
+{
+	return !operator==(other);
+}
+
+bool Mpz::operator!=(ulong n) const
+{
+	return !operator==(n);
+}
+
+bool gmp::Mpz::operator>(const Mpz& other) const
+{
+	return mpz_cmp(this->_value, other._value) > 0;
+}
+
+bool Mpz::operator>(ulong n) const
+{
+	return mpz_cmp_ui(this->_value, n) > 0;
+}
+
+bool gmp::Mpz::operator>=(const Mpz& other) const
+{
+	return mpz_cmp(this->_value, other._value) >= 0;
+}
+
+bool gmp::Mpz::operator>=(ulong n) const
+{
+	return mpz_cmp_ui(this->_value, n) >= 0;
+}
+
+bool gmp::Mpz::operator<(const Mpz& other) const
+{
+	return mpz_cmp(this->_value, other._value) < 0;
+}
+
+bool gmp::Mpz::operator<(ulong n) const
+{
+	return mpz_cmp_ui(this->_value, n) < 0;
+}
+
+bool gmp::Mpz::operator<=(const Mpz& other) const
+{
+	return mpz_cmp(this->_value, other._value) <= 0;
+}
+
+bool gmp::Mpz::operator<=(ulong n) const
+{
+	return mpz_cmp_ui(this->_value, n) <= 0;
+}
+
 Mpz& Mpz::operator=(const Mpz& other) {
 	if (this != &other) {
 		mpz_set(_value, other());
 	}
 	return *this;
+}
+
+Mpz& Mpz::operator=(const ulong n) {
+	mpz_set_ui(_value, n);
+	return *this;
+}
+
+Mpz& Mpz::operator=(const string str)
+{
+	mpz_set_str(_value, str.c_str(), 10);
+	return *this;
+}
+
+Mpz Mpz::operator-(const ulong n) const {
+	Mpz mpz;
+	mpz_sub_ui(mpz._value, this->_value, n);
+	return mpz;
+}
+
+Mpz Mpz::operator-(const Mpz& other) const
+{
+	Mpz mpz;
+	mpz_sub(mpz._value, this->_value, other._value);
+	return mpz;
+}
+
+void gmp::Mpz::operator-=(const ulong n)
+{
+	mpz_sub_ui(this->_value, this->_value, n);
+}
+
+void gmp::Mpz::operator-=(const Mpz& other)
+{
+	mpz_sub(this->_value, this->_value, other._value);
+}
+
+Mpz gmp::Mpz::operator-() const
+{
+	return *this * -1UL;
+}
+
+Mpz Mpz::operator+(const ulong n) const {
+	Mpz mpz;
+	mpz_add_ui(mpz._value, this->_value, n);
+	return mpz;
+}
+
+Mpz Mpz::operator+(const Mpz& other) const
+{
+	Mpz mpz;
+	mpz_add(mpz._value, this->_value, other._value);
+	return mpz;
+}
+
+void Mpz::operator+=(const ulong n)
+{
+	mpz_add_ui(this->_value, this->_value, n);
+}
+
+void Mpz::operator+=(const Mpz& other)
+{
+	mpz_add(this->_value, this->_value, other._value);
+}
+
+Mpz Mpz::operator*(const ulong n) const {
+	Mpz mpz;
+	mpz_mul_si(mpz._value, this->_value, n);
+	return mpz;
+}
+
+Mpz Mpz::operator*(const Mpz& other) const
+{
+	Mpz mpz;
+	mpz_mul(mpz._value, this->_value, other._value);
+	return mpz;
+}
+
+void gmp::Mpz::operator*=(const ulong n)
+{
+	mpz_mul_ui(this->_value, this->_value, n);
+}
+
+void gmp::Mpz::operator*=(const Mpz& other)
+{
+	mpz_mul(this->_value, this->_value, other._value);
+}
+
+Mpz Mpz::operator%(const ulong n) const
+{
+	Mpz mpz;
+	mpz_mod_ui(mpz._value, this->_value, n);
+	return mpz;
+}
+
+Mpz Mpz::operator%(const Mpz& other) const
+{
+	Mpz mpz;
+	mpz_mod(mpz._value, this->_value, other());
+	return mpz;
+}
+
+void gmp::Mpz::operator%=(const ulong n)
+{
+	mpz_mod_ui(this->_value, this->_value, n);
+}
+
+void gmp::Mpz::operator%=(const Mpz& other)
+{
+	mpz_mod(this->_value, this->_value, other._value);
+}
+
+Mpz Mpz::operator/(const ulong n) const
+{
+	Mpz mpz;
+	mpz_fdiv_q_ui(mpz._value, this->_value, n);
+	return mpz;
+}
+
+Mpz Mpz::operator/(const Mpz& other) const
+{
+	Mpz mpz;
+	mpz_fdiv_q(mpz._value, this->_value, other._value);
+	return mpz;
+}
+
+void gmp::Mpz::operator/=(const ulong n)
+{
+	mpz_fdiv_q_ui(this->_value, this->_value, n);
+}
+
+void gmp::Mpz::operator/=(const Mpz& other)
+{
+	mpz_fdiv_q(this->_value, this->_value, other._value);
 }
 
 std::ostream& gmp::operator<<(std::ostream& os, const Mpz& mpz)
@@ -66,78 +266,26 @@ int Mpz::sscanf(const char* a, const char* b) const {
 	return gmp_sscanf(a, b, _value);
 }
 
-int Mpz::Mpz_set_str(const char *str) {
-	return mpz_set_str(_value, str, 10);
+/*static methods below */
+
+int Mpz::probab_prime_p(const Mpz& a, const int n) {
+	return mpz_probab_prime_p(a._value, n);
 }
 
-void Mpz::Mpz_set_ui(const ulong num) {
-	mpz_set_ui(_value, num);
+Mpz Mpz::urandomb(gmp_randstate_t state, mp_bitcnt_t num) {
+	Mpz mpz;
+	mpz_urandomb(mpz._value, state, num);
+	return mpz;
 }
 
-void Mpz::Mpz_pow_ui(const Mpz &a, const ulong n) {
-	mpz_pow_ui(_value, a(), n);
+Mpz Mpz::powm(const Mpz& a, const Mpz& b, const Mpz& c) {
+	Mpz mpz;
+	mpz_powm(mpz._value, a._value, b._value, c._value);
+	return mpz;
 }
 
-int Mpz::Mpz_cmp_ui(const ulong n) const {
-	return mpz_cmp_ui(_value, n);
-}
-
-int Mpz::Mpz_cmp(const Mpz& a) const {
-	return mpz_cmp(_value, a());
-}
-
-void Mpz::Mpz_urandomb(gmp_randstate_t state, mp_bitcnt_t num) {
-	mpz_urandomb(_value, state, num);
-}
-
-int Mpz::Mpz_probab_prime_p(const int n) const {
-	return mpz_probab_prime_p(_value, n);
-}
-
-void Mpz::Mpz_mul(const Mpz &a, const Mpz &b) {
-	mpz_mul(_value, a(), b());
-}
-
-void Mpz::Mpz_mul_si(const Mpz &a, const ulong n) {
-	mpz_mul_si(_value, a(), n);
-}
-
-void Mpz::Mpz_sub_ui(const Mpz &a, const ulong n) {
-	mpz_sub_ui(_value, a(), n);
-}
-
-void Mpz::Mpz_add_ui(const Mpz& a, const ulong n) {
-	mpz_add_ui(_value, a(), n);
-}
-
-void Mpz::Mpz_fdiv_q(const Mpz &a, const Mpz &b) {
-	mpz_fdiv_q(_value, a(), b());
-}
-
-void Mpz::Mpz_fdiv_q_ui(const Mpz& a, const ulong n) {
-	mpz_fdiv_q_ui(_value, a(), n);
-}
-
-void Mpz::Mpz_mod(const Mpz& a, const Mpz& b) {
-	mpz_mod(_value, a(), b());
-}
-
-void Mpz::Mpz_mod_ui(const Mpz& a, const ulong n) {
-	mpz_mod_ui(_value, a(), n);
-}
-
-void Mpz::Mpz_sub(const Mpz& a, const Mpz& b) {
-	mpz_sub(_value, a(), b());
-}
-
-void Mpz::Mpz_add(const Mpz& a, const Mpz& b) {
-	mpz_add(_value, a(), b());
-}
-
-void Mpz::Mpz_powm(const Mpz& a, const Mpz& b, const Mpz& c) {
-	mpz_powm(_value, a(), b(), c());
-}
-
-void Mpz::Mpz_powm_ui(const Mpz& a, const ulong n, const Mpz& b) {
-	mpz_powm_ui(_value, a(), n, b());
+Mpz Mpz::powm_ui(const Mpz& a, const ulong n, const Mpz& b) {
+	Mpz mpz;
+	mpz_powm_ui(mpz._value, a._value, n, b._value);
+	return mpz;
 }
