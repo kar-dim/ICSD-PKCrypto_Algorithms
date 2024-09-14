@@ -1,5 +1,6 @@
 #pragma once
 #include <gmp.h>
+#include <ostream>
 
 using ulong = unsigned long int;
 
@@ -18,7 +19,7 @@ namespace gmp {
 		const mpz_t& operator()() const;
 		Mpz& operator=(const Mpz& other);
 		Mpz& operator=(Mpz&& other) noexcept;
-
+		friend std::ostream& operator<<(std::ostream& os, const Mpz& mpz);
 		bool is_empty() const;
 		std::size_t size_in_bits() const;
 		int sprintf(char*, const char*) const;
@@ -32,8 +33,6 @@ namespace gmp {
 		int Mpz_cmp_ui(const ulong num) const;
 		void Mpz_pow_ui(const Mpz& a, const ulong num);
 		int Mpz_set_str(const char*);
-		void Mpz_out_str() const;
-
 		void Mpz_mul(const Mpz& a, const Mpz& b);
 		void Mpz_mul_si(const Mpz& a, const ulong n);
 		void Mpz_add(const Mpz& a, const Mpz& b);

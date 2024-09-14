@@ -30,13 +30,7 @@ void CryptoRabin::initialize_parameters() {
 }
 
 void CryptoRabin::print_parameters() const {
-    cout << "p = ";
-    p.Mpz_out_str();
-    cout << "\n\nq = ";
-    q.Mpz_out_str();
-    cout << "\n\nn = ";
-    n.Mpz_out_str();
-    cout << "\n\n";
+    cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n";
 }
 
 gmp::Mpz CryptoRabin::english_to_decimal(const string &word) const {

@@ -35,15 +35,8 @@ void CryptoElGamal::initialize_parameters() {
 }
 
 void CryptoElGamal::print_parameters() const {
-    cout << "p = ";
-    p.Mpz_out_str();
-    cout << "\n\ng = ";
-    g.Mpz_out_str();
-    cout << "\n\nPublic key = ";
-    public_key.Mpz_out_str();
-    cout << "\n\nPrivate key = ";
-    a.Mpz_out_str();
-    cout << "\n\n";
+    cout << "p = " << p << "\n\n" << "g = " << g << "\n\n"
+         << "Public key = " << public_key << "\n\n" << "Private key = " << a << "\n\n";
 }
 
 bool CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) {

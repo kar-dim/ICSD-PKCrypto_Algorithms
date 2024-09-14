@@ -1,5 +1,6 @@
 #include "Mpz.h"
 #include <gmp.h>
+#include <ostream>
 
 using gmp::Mpz;
 
@@ -42,6 +43,12 @@ Mpz& Mpz::operator=(const Mpz& other) {
 	return *this;
 }
 
+std::ostream& gmp::operator<<(std::ostream& os, const Mpz& mpz)
+{
+	mpz_out_str(NULL, 10, mpz());
+	return os;
+}
+
 bool Mpz::is_empty() const {
 	return _value[0]._mp_alloc == 0;
 }
@@ -61,10 +68,6 @@ int Mpz::sscanf(const char* a, const char* b) const {
 
 int Mpz::Mpz_set_str(const char *str) {
 	return mpz_set_str(_value, str, 10);
-}
-
-void Mpz::Mpz_out_str() const {
-	mpz_out_str(NULL, 10, _value);
 }
 
 void Mpz::Mpz_set_ui(const ulong num) {
@@ -138,4 +141,3 @@ void Mpz::Mpz_powm(const Mpz& a, const Mpz& b, const Mpz& c) {
 void Mpz::Mpz_powm_ui(const Mpz& a, const ulong n, const Mpz& b) {
 	mpz_powm_ui(_value, a(), n, b());
 }
-

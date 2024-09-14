@@ -10,18 +10,8 @@ CryptoRSA::CryptoRSA(): CryptoBase() {
 }
 
 void CryptoRSA::print_parameters() const {
-    cout << "p = ";
-    p.Mpz_out_str();
-    cout << "\n\nq = ";
-    q.Mpz_out_str();
-    cout << "\n\nn = ";
-    n.Mpz_out_str();
-    cout << "\n\nphi = ";
-    totient.Mpz_out_str();
-    cout << "\n\nPublic key is n and e = 65537\n\n";
-    cout << "private key = ";
-    d.Mpz_out_str();
-    cout << "\n\n";
+    cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n" << "phi = " << totient
+         << "\n\n" << "Public key is n and e = 65537" << "\n\n" << "Private key = " << d << "\n\n";
 }
 
 void CryptoRSA::initialize_parameters() {
