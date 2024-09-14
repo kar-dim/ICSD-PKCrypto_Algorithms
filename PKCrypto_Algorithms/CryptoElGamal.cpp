@@ -3,35 +3,30 @@
 #include <iostream>
 
 using std::cout;
+using gmp::Mpz;
 
 void CryptoElGamal::initialize_parameters() {
     //p: random prime
     while (true) {
         //δημιουργία του p
-        p.Mpz_urandomb(state, key_size);
-        if (p.Mpz_probab_prime_p(30) >= 1)
+        p = Mpz::urandomb(state, key_size);
+        if (Mpz::probab_prime_p(p, 30) >= 1)
             break;
     }
 
     //Είναι σύνηθες να ισχύει (p-1) = 2g οπότε g (γεννήτορας Z*p) = (p-1)/2
-    gmp::Mpz p_minus_one;
-
-    p_minus_one.Mpz_sub_ui(p, 1); //p-1
-    g.Mpz_fdiv_q_ui(p_minus_one, 2); // g = (p - 1) / 2
+    g = (p - 1) / 2;
 
     //εύρεση του a (το οποίο είναι ο εκθέτης στο g^a mod p το οποίο είναι το public key)
     //το α ειναι ενας τυχαιος στο διαστημα [0,p-2]
-    gmp::Mpz p_minus_two;
-    p_minus_two.Mpz_sub_ui(p, 2); //p-2
+    const Mpz p_minus_two = p - 2;
     while (true) {
-        a.Mpz_urandomb(state, key_size);
-        if (a.Mpz_cmp(p_minus_two) <= 0) {
+        a = Mpz::urandomb(state, key_size);
+        if (a <= p_minus_two)
             break;
-        }
     }
-
     //a = private key, υπολογίζουμε το g^a mod p που ειναι το public key
-    public_key.Mpz_powm(g, a, p);
+    public_key = Mpz::powm(g, a, p);
 }
 
 void CryptoElGamal::print_parameters() const {
@@ -39,52 +34,32 @@ void CryptoElGamal::print_parameters() const {
          << "Public key = " << public_key << "\n\n" << "Private key = " << a << "\n\n";
 }
 
-bool CryptoElGamal::encrypt(const gmp::Mpz &input, gmp::Mpz &c1,  gmp::Mpz &c2) {
+bool CryptoElGamal::encrypt(const Mpz &input, Mpz &c1,  Mpz &c2) {
     if (input.size_in_bits() >= key_size)
         return false;
-    //δημιουργια του k, 1<=k<=p-2
-    gmp::Mpz k, p_minus_two;
-    p_minus_two.Mpz_sub_ui(p, 2);
 
+    //δημιουργια του k, 1<=k<=p-2
+    const Mpz p_minus_two = p - 2;
+    Mpz k;
     while (true) {
-        k.Mpz_urandomb(state, key_size);
-        //έλεγχος αν k>=1 και k<=p-2, αν ναι τοτε break
-        if (k.Mpz_cmp(p_minus_two) <= 0 && k.Mpz_cmp_ui(1) >= 0)
+        k = Mpz::urandomb(state, key_size);
+        //έλεγχος αν k<=p-2 και k>=1, αν ναι τοτε break
+        if (k <= p_minus_two && k >= 1)
             break;
     }
 
-    //1: c1 = g^k mod p
-    //2: c2 = plaintext * (public_key)^k mod p
-    //τα c1,c2 είναι το ciphertext
+    //c1 = g^k mod p
+    c1 = Mpz::powm(g, k, p);
 
-    //c1
-    c1.Mpz_powm(g, k, p);
-
-    //c2
+    //c2 = plaintext * (public_key)^k mod p
     //πολλαπλασιαστικός κανόνας: (plaintext * (public_key)^k) mod p = ( (plaintext mod p )*( public_key^k mod p ) ) mod p
-    gmp::Mpz plaintext_mod_p, public_key_mod_p, intermediate;
-
-    plaintext_mod_p.Mpz_mod(input, p);//plaintext_mod_p = plaintext MOD p
-    public_key_mod_p.Mpz_powm(public_key, k, p); //public_key_mod_p = public_key^k MOD p
-    intermediate.Mpz_mul(plaintext_mod_p, public_key_mod_p); //intermediate το γινόμενο
-    //c2 = intermediate MOD p
-    c2.Mpz_mod(intermediate, p);
+    c2 = ((input % p) * Mpz::powm(public_key, k, p)) % p;
     return true;
 }
 
-gmp::Mpz CryptoElGamal::decrypt(const gmp::Mpz &c1, const gmp::Mpz &c2) const {
-    gmp::Mpz intermediate, exponential, temp, plaintext;
-
-    //p-1-private
-    temp.Mpz_sub_ui(p, 1);
-    exponential.Mpz_sub(temp, a); //exponential = p-1-private_key
-
+Mpz CryptoElGamal::decrypt(const Mpz &c1, const Mpz &c2) const {
     //intermediate = c1 ^ (p - 1 - private_key) mod p
-    intermediate.Mpz_powm(c1, exponential, p);
-
+    Mpz intermediate = Mpz::powm(c1, (p - 1) - a, p);
     //αποκρυπτογράφηση ως intermediate * c2 mod p
-    gmp::Mpz temp2;
-    temp2.Mpz_mul(intermediate, c2); //temp2 = intermediate*c2
-    plaintext.Mpz_mod(temp2, p); // plaintext = temp2 mod p
-    return plaintext;
+    return (intermediate * c2 ) % p;
 }

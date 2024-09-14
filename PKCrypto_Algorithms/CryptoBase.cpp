@@ -10,6 +10,7 @@
 #include <string>
 
 using std::string;
+using gmp::Mpz;
 
 CryptoBase::CryptoBase() {
     gmp_randinit_default(state); //αρχικοποίηση του random state
@@ -57,19 +58,17 @@ string CryptoBase::english_to_decimal_str(const string& word) const {
 }
 
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
-gmp::Mpz CryptoBase::english_to_decimal(const string &word) const {
-    gmp::Mpz number;
-    string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
+Mpz CryptoBase::english_to_decimal(const string &word) const {
+    const string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
     if (characters_as_numbers.empty())
-        return number;
+        return Mpz();
     //store σε GNU MP array
-    number.Mpz_set_str(characters_as_numbers.c_str());
-    return number;
+    return Mpz(characters_as_numbers);
 }
 
-string CryptoBase::decimal_to_english(gmp::Mpz& number, const int max_bytes) {
+string CryptoBase::decimal_to_english(Mpz& number, const int max_bytes) {
     const std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
-    int size = gmp_sprintf(number_buff.get(), "%Zd", number);
+    int size = gmp_sprintf(number_buff.get(), "%Zd", number());
     const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
     if (size > max_bytes || (should_pad && size + 1 > max_bytes))
         return "";

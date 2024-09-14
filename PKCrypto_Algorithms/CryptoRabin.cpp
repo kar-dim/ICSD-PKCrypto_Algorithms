@@ -7,83 +7,68 @@
 
 using std::cout;
 using std::string;
+using gmp::Mpz;
 
 void CryptoRabin::initialize_parameters() {
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
-    gmp::Mpz temp_p, temp_q;
     while (true) {
         //δημιουργία των δυο τυχαίων
-        p.Mpz_urandomb(state, key_size);
-        q.Mpz_urandomb(state, key_size);
+        p = Mpz::urandomb(state, key_size);
+        q = Mpz::urandomb(state, key_size);
         //έλεγχος αν είναι prime, αν είναι τότε ελέγχουμε και την επιπλέον συνθήκη, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
-        if (p.Mpz_probab_prime_p(30) >= 1 && q.Mpz_probab_prime_p(30) >= 1) {
-            temp_p.Mpz_mod_ui(p, 4);
-            temp_q.Mpz_mod_ui(q, 4);
-            //εναλλακτικά μπορούσαμε με τη συνάρτηση mpz_congruent_p_ui_p απευθείας
+        if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1) {
             //έλεγχος αν είναι ίδια και ίσα με 3
-            if (temp_p.Mpz_cmp_ui(3) == 0 && temp_q.Mpz_cmp_ui(3) == 0)
+            if ((p % 4 == 3) && (q % 4 == 3))
                 break;
         }
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
-    n.Mpz_mul(p, q);
+    n = p * q;
 }
 
 void CryptoRabin::print_parameters() const {
     cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n";
 }
 
-gmp::Mpz CryptoRabin::english_to_decimal(const string &word) const {
-    gmp::Mpz number;
+Mpz CryptoRabin::english_to_decimal(const string &word) const {
     string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
     if (characters_as_numbers.empty())
-        return number;
-    //padding
-    characters_as_numbers += "111111111111";
-    number.Mpz_set_str(characters_as_numbers.c_str());
-    return number;
+        return Mpz();
+    //return padded characters
+    return Mpz(characters_as_numbers + "111111111111");
 }
 
-bool CryptoRabin::encrypt(const gmp::Mpz &plaintext, gmp::Mpz &ciphertext) const {
+bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz &ciphertext) const {
     if (plaintext.size_in_bits() >= key_size)
         return false;
-    ciphertext.Mpz_powm_ui(plaintext, 2, n);
+    ciphertext = Mpz::powm_ui(plaintext, 2, n);
     return true;
 }
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
-void CryptoRabin::euclid(gmp::Mpz &a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) const {
-    gmp::Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
-    gmp::Mpz a_copy(a), b_copy(b);
-
+void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
+    Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
+    Mpz a_copy(a), b_copy(b);
+ 
     //αν b=0 τοτε d=a, x=1, y=0.
-    if (b_copy.Mpz_cmp_ui(0) == 0) {
+    if (b_copy == 0) {
         d = a_copy; //mpz_set(d, a_copy);
-        x.Mpz_set_ui(1);
-        y.Mpz_set_ui(0);
+        x = 1;
+        y = 0;
         return;
     }
-    //an b δεν είναι 0 τότε
-    //x2=1, x1=0, y2=0, y1=1
-    x2.Mpz_set_ui(1);
-    x1.Mpz_set_ui(0);
-    y2.Mpz_set_ui(0);
-    y1.Mpz_set_ui(1);
 
-    //όσο b>0
-    while (b_copy.Mpz_cmp_ui(0) > 0) {
+    x2 = 1, x1 = 0, y2 = 0, y1 = 1;
+    while (b_copy > 0) {
         //q= [a/b], fdiv κανει flooring, δηλαδη 8/5 = 1.κατι..= 1 (ενω ceil θα εβγαζε 2)
-        q.Mpz_fdiv_q(a_copy, b_copy);
+        q = a_copy / b_copy;
         // r = a -qb
-        qb.Mpz_mul(q, b_copy);
-        r.Mpz_sub(a_copy, qb);
+        r = a_copy - (q * b_copy);
         //x = x2 -qx1
-        qx1.Mpz_mul(q, x);
-        x.Mpz_sub(x2, qx1);
+        x = x2 - (q * x);
         //y = y2 - qy1
-        qy1.Mpz_mul(q, y1);
-        y.Mpz_sub(y2, qy1);
+        y = y2 - (q * y1);
         //a=b
         a_copy = b_copy;
         //mpz_set(a_copy, b_copy);
@@ -113,46 +98,29 @@ void CryptoRabin::euclid(gmp::Mpz &a, gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp
     //τα τα d,x,y έχουν τιμές
 }
 
-void CryptoRabin::e_euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& gcd_a_b) {
-    p.Mpz_cmp(q) > 1 ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
+void CryptoRabin::e_euclid(Mpz& a, Mpz& b, Mpz& gcd_a_b) {
+    p > q ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
 }
 
 //εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
-void CryptoRabin::calculate_four_candidates(const gmp::Mpz& ciphertext, const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& mx_mod_n, gmp::Mpz& y, gmp::Mpz& my_mod_n) const {
-    gmp::Mpz r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
-
+void CryptoRabin::calculate_four_candidates(const Mpz& ciphertext, const Mpz& a, const Mpz& b, Mpz& x, Mpz& mx_mod_n, Mpz& y, Mpz& my_mod_n) const {
+    Mpz r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
     // r = c^((p+1)/4) MOD p
-    p_plus_one.Mpz_add_ui(p, 1);
-    p_plus_one_div4.Mpz_fdiv_q_ui(p_plus_one, 4);
-    r.Mpz_powm(ciphertext, p_plus_one_div4, p);
-
+    r = Mpz::powm(ciphertext, (p + 1) / 4, p);
     // s = c^((q+1)/4) MOD q
-    q_plus_one.Mpz_add_ui(q, 1);
-    q_plus_one_div4.Mpz_fdiv_q_ui(q_plus_one, 4);
-    s.Mpz_powm(ciphertext, q_plus_one_div4, q);
-
-    //abs, bqr
-    ap.Mpz_mul(a, p);
-    aps.Mpz_mul(ap, s);
-    bq.Mpz_mul(b, q);
-    bqr.Mpz_mul(bq, r);
-
+    s = Mpz::powm(ciphertext, (q + 1) / 4, q);
+    //aps, bqr
+    aps = a * p * s;
+    bqr = b * q * r;
     // x = (aps + bqr) MOD n (1)
-    aps_plus_bqr.Mpz_add(aps, bqr);
-    x.Mpz_mod(aps_plus_bqr, n);
+    x = (aps + bqr) % n;
     // y = (aps - bqr) MOD n (2)
-    aps_minus_bqr.Mpz_sub(aps, bqr);
-    y.Mpz_mod(aps_minus_bqr, n);
-
-    //-x
-    mx.Mpz_mul_si(x, -1);
-    //-y
-    my.Mpz_mul_si(y, -1);
+    y = (aps - bqr) % n;
     //-x mod n (3)
-    mx_mod_n.Mpz_mod(mx, n);
+    mx_mod_n = -x % n;
     //-y mod n (4)
-    my_mod_n.Mpz_mod(my, n);
+    my_mod_n = -y % n;
 }
 
 //βοηθητική μέθοδος για έλεγχο των decrypted plaintext
@@ -166,7 +134,7 @@ void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std:
 }
 
 //εύρεση του σωστού plaintext
-gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n) const {
+Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx_mod_n, const Mpz& my_mod_n) const {
     //x*x max = 2x bits
     const int max_size = key_size * 2;
     std::unique_ptr<char[]>x_chars(new char[max_size]);
@@ -181,7 +149,7 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
 
     //αν κάποιο δε διαβάστηκε σωστά τότε οι παραμέτροι είναι λάθος
     if (size_x < 0 || size_y < 0 || size_mx < 0 || size_my < 0)
-        return gmp::Mpz();
+        return Mpz();
 
     //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
     //και επιστρέφουμε το plaintext
@@ -191,7 +159,7 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
     const bool is_my = check_plaintext_chars(my_chars, size_my);
 
     if (is_x == false && is_y == false && is_mx == false && is_my == false)
-        return gmp::Mpz();
+        return Mpz();
 
     string buf;
     check_and_retrieve_plaintext(is_x, x_chars, size_x, buf);
@@ -199,7 +167,7 @@ gmp::Mpz CryptoRabin::get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y
     check_and_retrieve_plaintext(is_mx, mx_chars, size_mx, buf);
     check_and_retrieve_plaintext(is_my, my_chars, size_my, buf);
     
-    gmp::Mpz correct_plaintext;
+    Mpz correct_plaintext;
     correct_plaintext.sscanf(buf.c_str(), "%Zd");
     return correct_plaintext;
 }
