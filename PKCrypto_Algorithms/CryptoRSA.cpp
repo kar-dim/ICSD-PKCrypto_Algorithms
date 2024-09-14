@@ -19,8 +19,8 @@ void CryptoRSA::initialize_parameters() {
     //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
     while (true) {
         //δημιουργία των δυο τυχαίων
-        p = Mpz::urandomb(state, key_size);
-        q = Mpz::urandomb(state, key_size);
+        p = Mpz::urandomb(state, key_factors_max_size);
+        q = Mpz::urandomb(state, key_factors_max_size);
         if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1)
             break;
     }

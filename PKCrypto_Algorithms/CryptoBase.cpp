@@ -15,6 +15,7 @@ using gmp::Mpz;
 CryptoBase::CryptoBase() {
     gmp_randinit_default(state); //αρχικοποίηση του random state
     gmp_randseed_ui(state, static_cast<ulong>(time(NULL)));
+    public_key_size = -1;
 }
 
 CryptoBase::~CryptoBase() {

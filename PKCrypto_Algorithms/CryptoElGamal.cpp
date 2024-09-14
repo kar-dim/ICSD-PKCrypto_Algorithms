@@ -9,7 +9,7 @@ void CryptoElGamal::initialize_parameters() {
     //p: random prime
     while (true) {
         //δημιουργία του p
-        p = Mpz::urandomb(state, key_size);
+        p = Mpz::urandomb(state, key_max_size);
         if (Mpz::probab_prime_p(p, 30) >= 1)
             break;
     }
@@ -22,7 +22,7 @@ void CryptoElGamal::initialize_parameters() {
     //το α ειναι ενας τυχαιος στο διαστημα [0,p-2]
     const Mpz p_minus_two = p - 2;
     while (true) {
-        a = Mpz::urandomb(state, key_size);
+        a = Mpz::urandomb(state, key_max_size);
         if (a <= p_minus_two)
             break;
     }
@@ -43,7 +43,7 @@ bool CryptoElGamal::encrypt(const Mpz &input, Mpz &c1,  Mpz &c2) {
     const Mpz p_minus_two = p - 2;
     Mpz k;
     while (true) {
-        k = Mpz::urandomb(state, key_size);
+        k = Mpz::urandomb(state, key_max_size);
         //έλεγχος αν k<=p-2 και k>=1, αν ναι τοτε break
         if (k <= p_minus_two && k >= 1)
             break;

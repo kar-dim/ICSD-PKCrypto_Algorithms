@@ -13,8 +13,8 @@ void CryptoRabin::initialize_parameters() {
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
     while (true) {
         //δημιουργία των δυο τυχαίων
-        p = Mpz::urandomb(state, key_size);
-        q = Mpz::urandomb(state, key_size);
+        p = Mpz::urandomb(state, key_factors_max_size);
+        q = Mpz::urandomb(state, key_factors_max_size);
         //έλεγχος αν είναι prime, αν είναι τότε ελέγχουμε και την επιπλέον συνθήκη, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
         if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1) {
             //έλεγχος αν είναι ίδια και ίσα με 3
@@ -119,7 +119,7 @@ void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std:
 //εύρεση του σωστού plaintext
 Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx_mod_n, const Mpz& my_mod_n) const {
     //x*x max = 2x bits
-    const int max_size = key_size * 2;
+    const int max_size = key_factors_max_size * 2;
     std::unique_ptr<char[]>x_chars(new char[max_size]);
     std::unique_ptr<char[]>y_chars(new char[max_size]);
     std::unique_ptr<char[]>mx_chars(new char[max_size]);

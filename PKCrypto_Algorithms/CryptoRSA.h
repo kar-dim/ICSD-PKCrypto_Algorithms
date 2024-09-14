@@ -5,10 +5,10 @@
 class CryptoRSA : public CryptoBase
 {
 private:
-	gmp::Mpz p, q, n, e, d, totient;
 	static constexpr int e_value = 65537;
+	static constexpr size_t key_factors_max_size = 512;
+	gmp::Mpz p, q, n, e, d, totient;
 public:
-	static constexpr size_t key_size = 512;
 	CryptoRSA();
 	~CryptoRSA() = default;
 	//υπολογισμος των p,q,n + υπολογισμός του φ(n) = φ(p)φ(q) = (p-1)(q-1), λόγω ότι p,q είναι primes

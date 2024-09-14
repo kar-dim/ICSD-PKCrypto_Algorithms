@@ -5,9 +5,9 @@
 class CryptoElGamal : public CryptoBase
 {
 private:
+	static constexpr size_t key_max_size = 200;
 	gmp::Mpz p, g, a, public_key;
 public:
-	static constexpr size_t key_size = 200;
 	CryptoElGamal() = default;
 	~CryptoElGamal() = default;
 	void initialize_parameters() override;
