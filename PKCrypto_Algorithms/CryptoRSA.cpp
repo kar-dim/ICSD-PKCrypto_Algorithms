@@ -26,6 +26,7 @@ void CryptoRSA::initialize_parameters() {
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
+    public_key_size = n.size_in_bits();
     //ευρεση του (phi) totient = (p-1)(q-1)
     totient = (p - 1) * (q - 1);
 }
@@ -62,7 +63,7 @@ bool CryptoRSA::e_euclid() {
 }
 
 bool CryptoRSA::encrypt(const Mpz &rsa_decimal_value, Mpz &ciphertext) const {
-    if (rsa_decimal_value.size_in_bits() >= 2 * key_size)
+    if (rsa_decimal_value.size_in_bits() > public_key_size - 1)
         return false;
     ciphertext = Mpz::powm(rsa_decimal_value, e, n);
     return true;

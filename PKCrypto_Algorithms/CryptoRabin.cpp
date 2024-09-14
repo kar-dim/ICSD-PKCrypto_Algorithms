@@ -24,6 +24,7 @@ void CryptoRabin::initialize_parameters() {
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
+    public_key_size = n.size_in_bits();
 }
 
 void CryptoRabin::print_parameters() const {
@@ -39,7 +40,7 @@ Mpz CryptoRabin::english_to_decimal(const string &word) const {
 }
 
 bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz &ciphertext) const {
-    if (plaintext.size_in_bits() >= key_size)
+    if (plaintext.size_in_bits() > public_key_size - 1)
         return false;
     ciphertext = Mpz::powm_ui(plaintext, 2, n);
     return true;
@@ -50,10 +51,10 @@ bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz &ciphertext) const {
 void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
     Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
     Mpz a_copy(a), b_copy(b);
- 
+
     //αν b=0 τοτε d=a, x=1, y=0.
     if (b_copy == 0) {
-        d = a_copy; //mpz_set(d, a_copy);
+        d = a_copy;
         x = 1;
         y = 0;
         return;
@@ -66,36 +67,18 @@ void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
         // r = a -qb
         r = a_copy - (q * b_copy);
         //x = x2 -qx1
-        x = x2 - (q * x);
-        //y = y2 - qy1
+        x = x2 - (q * x1);
         y = y2 - (q * y1);
-        //a=b
         a_copy = b_copy;
-        //mpz_set(a_copy, b_copy);
-        //b=r
         b_copy = r;
-        //mpz_set(b_copy, r);
-        //x2=x1
         x2 = x1;
-        //mpz_set(x2, x1);
-        //x1=x
         x1 = x;
-        //mpz_set(x1, x);
-        //y2=y1
         y2 = y1;
-        //mpz_set(y2, y1);
-        //y1=y
         y1 = y;
-        //mpz_set(y1, y);
     }
-    //d=a, x=x2, y=y2
     d = a_copy;
     x = x2;
     y = y2;
-    //mpz_set(d, a_copy);
-    //mpz_set(x, x2);
-    //mpz_set(y, y2);
-    //τα τα d,x,y έχουν τιμές
 }
 
 void CryptoRabin::e_euclid(Mpz& a, Mpz& b, Mpz& gcd_a_b) {

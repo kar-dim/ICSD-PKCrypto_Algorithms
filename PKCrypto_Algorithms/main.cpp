@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
         Mpz ciphertext;
         if (!rsa.encrypt(rsa_decimal_value, ciphertext)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << (CryptoRSA::key_size * 2) - 1 << " bits, input size is: " << rsa_decimal_value.size_in_bits() << " bits\n";
+            cout << "Failed to encrypt! Maximum allowed input size is: " << rsa.get_public_key_size() - 1 << " bits, input size is: " << rsa_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
         cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
         //κρυπτογράφηση
         Mpz c1, c2;
         if (!elgamal.encrypt(elgamal_decimal_value, c1, c2)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << CryptoElGamal::key_size - 1 << " bits, input size is: " << elgamal_decimal_value.size_in_bits() << " bits\n";
+            cout << "Failed to encrypt! Maximum allowed input size is: " << elgamal.get_public_key_size() - 1 << " bits, input size is: " << elgamal_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
         //εκτύπωση των δύο ciphertext
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
         //κρυπτογράφηση
         Mpz ciphertext;
         if (!rabin.encrypt(rabin_decimal_value, ciphertext)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << (CryptoRabin::key_size) - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
+            cout << "Failed to encrypt! Maximum allowed input size is: " << rabin.get_public_key_size() - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
         cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";

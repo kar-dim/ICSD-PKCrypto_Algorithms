@@ -66,6 +66,11 @@ Mpz CryptoBase::english_to_decimal(const string &word) const {
     return Mpz(characters_as_numbers);
 }
 
+size_t CryptoBase::get_public_key_size() const
+{
+    return public_key_size;
+}
+
 string CryptoBase::decimal_to_english(Mpz& number, const int max_bytes) {
     const std::unique_ptr<char[]> number_buff(new char[max_bytes]);//200 για elgamal, 1024 για rabin/rsa
     int size = gmp_sprintf(number_buff.get(), "%Zd", number());
