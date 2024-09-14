@@ -6,7 +6,6 @@
 #include <ctime>
 #include <format>
 #include <gmp.h>
-#include <memory>
 #include <string>
 
 #define MAX_PLAINTEXT_CHARS 2048
