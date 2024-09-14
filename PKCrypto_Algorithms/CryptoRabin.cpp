@@ -9,15 +9,13 @@ using std::cout;
 using std::string;
 using gmp::Mpz;
 
-void CryptoRabin::initialize_parameters() {
+CryptoRabin::CryptoRabin()
+{
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
     while (true) {
-        //δημιουργία των δυο τυχαίων
         p = Mpz::urandomb(state, key_factors_max_size);
         q = Mpz::urandomb(state, key_factors_max_size);
-        //έλεγχος αν είναι prime, αν είναι τότε ελέγχουμε και την επιπλέον συνθήκη, αλλιώς θα ξαναδημιουργηθούν πάλι δύο τυχαίοι
         if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1) {
-            //έλεγχος αν είναι ίδια και ίσα με 3
             if ((p % 4 == 3) && (q % 4 == 3))
                 break;
         }

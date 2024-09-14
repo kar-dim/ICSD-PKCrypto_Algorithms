@@ -11,8 +11,6 @@ private:
 public:
 	CryptoRSA();
 	~CryptoRSA() = default;
-	//υπολογισμος των p,q,n + υπολογισμός του φ(n) = φ(p)φ(q) = (p-1)(q-1), λόγω ότι p,q είναι primes
-	void initialize_parameters() override;
 	//εκτυπωση
 	void print_parameters() const override;
 

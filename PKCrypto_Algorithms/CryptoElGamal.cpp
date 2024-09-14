@@ -5,10 +5,10 @@
 using std::cout;
 using gmp::Mpz;
 
-void CryptoElGamal::initialize_parameters() {
+CryptoElGamal::CryptoElGamal()
+{
     //p: random prime
     while (true) {
-        //δημιουργία του p
         p = Mpz::urandomb(state, key_max_size);
         if (Mpz::probab_prime_p(p, 30) >= 1)
             break;

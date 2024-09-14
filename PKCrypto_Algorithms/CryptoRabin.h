@@ -14,11 +14,10 @@ private:
 	bool check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const;
 public:
 	
-	CryptoRabin() = default;
+	CryptoRabin();
 	~CryptoRabin() = default;
 	void print_parameters() const override;
 	void e_euclid(gmp::Mpz &a, gmp::Mpz &b, gmp::Mpz &gcd_a_b);
-	void initialize_parameters() override;
 	gmp::Mpz english_to_decimal(const std::string& word) const override;
 	bool encrypt(const gmp::Mpz &cleartext, gmp::Mpz &ciphertext) const;
 	void calculate_four_candidates(const gmp::Mpz &ciphertext, const gmp::Mpz& a, const gmp::Mpz &b, gmp::Mpz& x, gmp::Mpz& mx_mod_n, gmp::Mpz& y, gmp::Mpz& my_mod_n) const;

@@ -8,27 +8,25 @@ using gmp::Mpz;
 
 CryptoRSA::CryptoRSA(): CryptoBase() {
     e = e_value;
+    do {
+        //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
+        while (true) {
+            p = Mpz::urandomb(state, key_factors_max_size);
+            q = Mpz::urandomb(state, key_factors_max_size);
+            if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1)
+                break;
+        }
+        //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
+        n = p * q;
+        public_key_size = n.size_in_bits();
+        //ευρεση του (phi) totient = (p-1)(q-1)
+        totient = (p - 1) * (q - 1);
+    } while (!e_euclid());
 }
 
 void CryptoRSA::print_parameters() const {
     cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n" << "phi = " << totient
          << "\n\n" << "Public key is n and e = 65537" << "\n\n" << "Private key = " << d << "\n\n";
-}
-
-void CryptoRSA::initialize_parameters() {
-    //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
-    while (true) {
-        //δημιουργία των δυο τυχαίων
-        p = Mpz::urandomb(state, key_factors_max_size);
-        q = Mpz::urandomb(state, key_factors_max_size);
-        if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1)
-            break;
-    }
-    //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
-    n = p * q;
-    public_key_size = n.size_in_bits();
-    //ευρεση του (phi) totient = (p-1)(q-1)
-    totient = (p - 1) * (q - 1);
 }
 
 //συνάρτηση του επεκταμένου αλγορίθμου του Ευκλείδη

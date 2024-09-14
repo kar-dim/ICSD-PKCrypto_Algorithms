@@ -22,11 +22,6 @@ int main(int argc, char** argv) {
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
         CryptoRSA rsa;
-        //αρχικοποιηση RSA παραμετρων p,q n και totient (phi)
-        //private key: (d,n) όπου d βρίσκεται ως: e*d = 1 mod (φ(n)) μεσω του αλγοριθμου του Ευκλειδη
-        do {
-            rsa.initialize_parameters();
-        } while (!rsa.e_euclid());
         rsa.print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
@@ -62,7 +57,6 @@ int main(int argc, char** argv) {
     //elgamal method
     if (crypto_method.compare("elgamal") == 0) {
         CryptoElGamal elgamal;
-        elgamal.initialize_parameters();
         elgamal.print_parameters();
         cout << "Plaintext message = " << input << "\n\n";
 
@@ -100,7 +94,6 @@ int main(int argc, char** argv) {
     //rabin cryptosystem
     if (crypto_method.compare("rabin") == 0) {
         CryptoRabin rabin;
-        rabin.initialize_parameters();
         rabin.print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";

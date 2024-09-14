@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Mpz.h"
 #include <gmp.h>
+#include "Mpz.h"
 #include <string>
 
 class CryptoBase
@@ -16,7 +16,6 @@ protected:
 public:
 	CryptoBase();
 	virtual ~CryptoBase();
-	virtual void initialize_parameters() = 0;
 	virtual void print_parameters() const = 0;
 	virtual gmp::Mpz english_to_decimal(const std::string& word) const;
 	size_t get_public_key_size() const;
