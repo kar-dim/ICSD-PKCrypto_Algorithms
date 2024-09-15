@@ -11,17 +11,15 @@ using std::string;
 using gmp::Mpz;
 
 int main(int argc, char** argv) {
-
     if (argc != 3) {
         cout << "No Crypto method or input text found, exiting";
         return -1;
     }
-
     const string crypto_method(argv[1]);
     const string input(argv[2]);
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
-        CryptoRSA rsa;
+        const CryptoRSA rsa;
         rsa.print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
@@ -78,11 +76,11 @@ int main(int argc, char** argv) {
         cout << "Encrypted Ciphertext c2 = " << c2 << "\n\n";
 
         //αποκρυπτογράφηση
-        Mpz decrypted = elgamal.decrypt(c1, c2);
+        const Mpz decrypted = elgamal.decrypt(c1, c2);
         //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = " << decrypted << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
-        string decoded = CryptoBase::decimal_to_english(decrypted);
+        const string decoded = CryptoBase::decimal_to_english(decrypted);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;
@@ -93,7 +91,7 @@ int main(int argc, char** argv) {
 
     //rabin cryptosystem
     if (crypto_method.compare("rabin") == 0) {
-        CryptoRabin rabin;
+        const CryptoRabin rabin;
         rabin.print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
@@ -114,13 +112,13 @@ int main(int argc, char** argv) {
 
         //decrypt
         //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη
-        Mpz plaintext = rabin.decrypt(ciphertext);
+        const Mpz plaintext = rabin.decrypt(ciphertext);
         if (plaintext.is_empty()) {
             cout << "Could not decrypt, error in initialization process or none of the plaintext are correct";
             return -1;
         }
         //decode το plaintext
-        string decoded = CryptoBase::decimal_to_english(plaintext);
+        const string decoded = CryptoBase::decimal_to_english(plaintext);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;

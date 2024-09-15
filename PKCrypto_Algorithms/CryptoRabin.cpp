@@ -44,7 +44,7 @@ bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz &ciphertext) const {
     return true;
 }
 
-Mpz CryptoRabin::decrypt(const Mpz& ciphertext) {
+Mpz CryptoRabin::decrypt(const Mpz& ciphertext) const {
     Mpz a, b, gcd_a_b;
     e_euclid(a, b, gcd_a_b);
     //εκτύπωση των a,b και του gcd(a,b)=1
@@ -76,7 +76,7 @@ Mpz CryptoRabin::decrypt(const Mpz& ciphertext) {
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
-void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
+void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
     Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
     Mpz a_copy(a), b_copy(b);
 
@@ -109,7 +109,7 @@ void CryptoRabin::euclid(Mpz &a, Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
     y = y2;
 }
 
-void CryptoRabin::e_euclid(Mpz& a, Mpz& b, Mpz& gcd_a_b) {
+void CryptoRabin::e_euclid(Mpz& a, Mpz& b, Mpz& gcd_a_b) const {
     p > q ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
 }
 

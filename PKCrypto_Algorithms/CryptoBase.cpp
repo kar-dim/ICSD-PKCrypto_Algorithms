@@ -72,7 +72,7 @@ size_t CryptoBase::get_public_key_size() const
     return public_key_size;
 }
 
-string CryptoBase::decimal_to_english(Mpz& number) {
+string CryptoBase::decimal_to_english(const Mpz& number) {
     char number_buff[MAX_PLAINTEXT_CHARS] = { 0 };
     int size = gmp_sprintf(number_buff, "%Zd", number());
     const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
