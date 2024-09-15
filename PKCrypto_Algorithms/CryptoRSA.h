@@ -13,7 +13,7 @@ public:
 	CryptoRSA();
 	~CryptoRSA() = default;
 	void print_parameters() const override;
-	bool encrypt(const gmp::Mpz &input, gmp::Mpz &output) const;
-	gmp::Mpz decrypt(const gmp::Mpz &ciphertext) const;
+	bool encrypt(const gmp::Mpz& cleartext, gmp::Mpz ciphertexts[]) override;
+	gmp::Mpz decrypt(const gmp::Mpz ciphertexts[]) override;
 };
 

@@ -60,13 +60,13 @@ bool CryptoRSA::e_euclid() {
     return true;
 }
 
-bool CryptoRSA::encrypt(const Mpz &rsa_decimal_value, Mpz &ciphertext) const {
-    if (rsa_decimal_value.size_in_bits() > public_key_size - 1)
+bool CryptoRSA::encrypt(const Mpz& cleartext, Mpz ciphertexts[]) {
+    if (cleartext.size_in_bits() > public_key_size - 1)
         return false;
-    ciphertext = Mpz::powm(rsa_decimal_value, e, n);
+    ciphertexts[0] = Mpz::powm(cleartext, e, n);
     return true;
 }
 
-Mpz CryptoRSA::decrypt(const Mpz &ciphertext) const {
-    return Mpz::powm(ciphertext, d, n);
+Mpz CryptoRSA::decrypt(const Mpz ciphertexts[]) {
+    return Mpz::powm(ciphertexts[0], d, n);
 }

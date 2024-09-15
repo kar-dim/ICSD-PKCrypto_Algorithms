@@ -5,6 +5,7 @@
 #include "Mpz.h"
 #include <iostream>
 #include <string>
+#include <memory>
 
 using std::cout;
 using std::string;
@@ -17,13 +18,14 @@ int main(int argc, char** argv) {
     }
     const string crypto_method(argv[1]);
     const string input(argv[2]);
+    std::unique_ptr<CryptoBase> crypto;
     //rsa method
     if (crypto_method.compare("rsa") == 0) {
-        const CryptoRSA rsa;
-        rsa.print_parameters();
+        crypto = std::make_unique<CryptoRSA>();
+        crypto->print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
-        const Mpz rsa_decimal_value = rsa.english_to_decimal(input);
+        const Mpz rsa_decimal_value = crypto->english_to_decimal(input);
         if (rsa_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
@@ -31,15 +33,15 @@ int main(int argc, char** argv) {
         cout << "Encoded characters = " << rsa_decimal_value << "\n\n";
 
         //κρυπτογραφημένο Ciphertext στον RSA είναι το εξής: C = m^e mod n, m=rsa_decimal_value, e=65537
-        Mpz ciphertext;
-        if (!rsa.encrypt(rsa_decimal_value, ciphertext)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << rsa.get_public_key_size() - 1 << " bits, input size is: " << rsa_decimal_value.size_in_bits() << " bits\n";
+        Mpz ciphertext[1];
+        if (!crypto->encrypt(rsa_decimal_value, ciphertext)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << crypto->get_public_key_size() - 1 << " bits, input size is: " << rsa_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
-        cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";
+        cout << "Encrypted Ciphertext = " << ciphertext[0] << "\n\n";
 
         //decrypt, m = c^d MOD n, c=ciphertext, d=private key, m=plaintext
-        const Mpz plaintext = rsa.decrypt(ciphertext);
+        const Mpz plaintext = crypto->decrypt(ciphertext);
         
         //εκτύπωση του plaintext, πρέπει να είναι ακριβώς ίδιο με το (encoded) μήνυμα.
         cout << "Decrypted (and encoded) Plaintext = " << plaintext << "\n\n";
@@ -54,11 +56,11 @@ int main(int argc, char** argv) {
     }
     //elgamal method
     if (crypto_method.compare("elgamal") == 0) {
-        CryptoElGamal elgamal;
-        elgamal.print_parameters();
+        crypto = std::make_unique<CryptoElGamal>();
+        crypto->print_parameters();
         cout << "Plaintext message = " << input << "\n\n";
 
-        const Mpz elgamal_decimal_value = elgamal.english_to_decimal(input);
+        const Mpz elgamal_decimal_value = crypto->english_to_decimal(input);
         if (elgamal_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
@@ -66,17 +68,17 @@ int main(int argc, char** argv) {
         cout << "Encoded characters = " << elgamal_decimal_value << "\n\n";
 
         //κρυπτογράφηση
-        Mpz c1, c2;
-        if (!elgamal.encrypt(elgamal_decimal_value, c1, c2)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << elgamal.get_public_key_size() - 1 << " bits, input size is: " << elgamal_decimal_value.size_in_bits() << " bits\n";
+        Mpz ciphertexts[2];
+        if (!crypto->encrypt(elgamal_decimal_value, ciphertexts)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << crypto->get_public_key_size() - 1 << " bits, input size is: " << elgamal_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
         //εκτύπωση των δύο ciphertext
-        cout << "Encrypted Ciphertext c1 = " << c1 << "\n\n";
-        cout << "Encrypted Ciphertext c2 = " << c2 << "\n\n";
+        cout << "Encrypted Ciphertext c1 = " << ciphertexts[0] << "\n\n";
+        cout << "Encrypted Ciphertext c2 = " << ciphertexts[1] << "\n\n";
 
         //αποκρυπτογράφηση
-        const Mpz decrypted = elgamal.decrypt(c1, c2);
+        const Mpz decrypted = crypto->decrypt(ciphertexts);
         //εκτύπωση decrypted
         cout << "Decrypted (and encoded) plaintext = " << decrypted << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ απλώς κάνουμε decode (από αριθμό σε string το μήνυμα)
@@ -91,11 +93,11 @@ int main(int argc, char** argv) {
 
     //rabin cryptosystem
     if (crypto_method.compare("rabin") == 0) {
-        const CryptoRabin rabin;
-        rabin.print_parameters();
+        crypto = std::make_unique<CryptoRabin>();
+        crypto->print_parameters();
 
         cout << "Plaintext message = " << input << "\n\n";
-        const Mpz rabin_decimal_value = rabin.english_to_decimal(input);
+        const Mpz rabin_decimal_value = crypto->english_to_decimal(input);
         if (rabin_decimal_value.is_empty()) {
             cout << "Failed to encode the word! Can't encrypt\n";
             return -1;
@@ -103,16 +105,16 @@ int main(int argc, char** argv) {
         cout << "Encoded characters (plus redundancy) = " << rabin_decimal_value << "\n\n";
 
         //κρυπτογράφηση
-        Mpz ciphertext;
-        if (!rabin.encrypt(rabin_decimal_value, ciphertext)) {
-            cout << "Failed to encrypt! Maximum allowed input size is: " << rabin.get_public_key_size() - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
+        Mpz ciphertext[1];
+        if (!crypto->encrypt(rabin_decimal_value, ciphertext)) {
+            cout << "Failed to encrypt! Maximum allowed input size is: " << crypto->get_public_key_size() - 1 << " bits, input size is: " << rabin_decimal_value.size_in_bits() << " bits\n";
             return -1;
         }
-        cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";
+        cout << "Encrypted Ciphertext = " << ciphertext[0] << "\n\n";
 
         //decrypt
         //υπολογίζουμε τα a,b επεκταμένο αλγόριθμο του ευκλείδη
-        const Mpz plaintext = rabin.decrypt(ciphertext);
+        const Mpz plaintext = crypto->decrypt(ciphertext);
         if (plaintext.is_empty()) {
             cout << "Could not decrypt, error in initialization process or none of the plaintext are correct";
             return -1;

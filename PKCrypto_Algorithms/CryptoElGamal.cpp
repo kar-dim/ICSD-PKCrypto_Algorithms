@@ -35,8 +35,8 @@ void CryptoElGamal::print_parameters() const {
          << "Public key = " << public_key << "\n\n" << "Private key = " << a << "\n\n";
 }
 
-bool CryptoElGamal::encrypt(const Mpz &input, Mpz &c1,  Mpz &c2) {
-    if (input.size_in_bits() > public_key_size - 1)
+bool CryptoElGamal::encrypt(const Mpz &cleartext, Mpz ciphertexts[]) {
+    if (cleartext.size_in_bits() > public_key_size - 1)
         return false;
 
     //δημιουργια του k, 1<=k<=p-2
@@ -50,17 +50,17 @@ bool CryptoElGamal::encrypt(const Mpz &input, Mpz &c1,  Mpz &c2) {
     }
 
     //c1 = g^k mod p
-    c1 = Mpz::powm(g, k, p);
+    ciphertexts[0] = Mpz::powm(g, k, p);
 
     //c2 = plaintext * (public_key)^k mod p
     //πολλαπλασιαστικός κανόνας: (plaintext * (public_key)^k) mod p = ( (plaintext mod p )*( public_key^k mod p ) ) mod p
-    c2 = ((input % p) * Mpz::powm(public_key, k, p)) % p;
+    ciphertexts[1] = ((cleartext % p) * Mpz::powm(public_key, k, p)) % p;
     return true;
 }
 
-Mpz CryptoElGamal::decrypt(const Mpz &c1, const Mpz &c2) const {
+Mpz CryptoElGamal::decrypt(const Mpz ciphertexts[]) {
     //intermediate = c1 ^ (p - 1 - private_key) mod p
-    Mpz intermediate = Mpz::powm(c1, (p - 1) - a, p);
+    Mpz intermediate = Mpz::powm(ciphertexts[0], (p - 1) - a, p);
     //αποκρυπτογράφηση ως intermediate * c2 mod p
-    return (intermediate * c2 ) % p;
+    return (intermediate * ciphertexts[1]) % p;
 }

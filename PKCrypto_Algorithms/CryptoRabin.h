@@ -20,8 +20,8 @@ public:
 	~CryptoRabin() = default;
 	void print_parameters() const override;
 	gmp::Mpz english_to_decimal(const std::string& word) const override;
-	bool encrypt(const gmp::Mpz &cleartext, gmp::Mpz &ciphertext) const;
-	gmp::Mpz decrypt(const gmp::Mpz& ciphertext) const;
+	bool encrypt(const gmp::Mpz& cleartext, gmp::Mpz ciphertexts[]) override;
+	gmp::Mpz decrypt(const gmp::Mpz ciphertexts[]) override;
 	
 };
 
