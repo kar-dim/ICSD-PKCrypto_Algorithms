@@ -39,12 +39,12 @@ int main(int argc, char** argv) {
         cout << "Encrypted Ciphertext = " << ciphertext << "\n\n";
 
         //decrypt, m = c^d MOD n, c=ciphertext, d=private key, m=plaintext
-        Mpz plaintext = rsa.decrypt(ciphertext);
+        const Mpz plaintext = rsa.decrypt(ciphertext);
         
         //εκτύπωση του plaintext, πρέπει να είναι ακριβώς ίδιο με το (encoded) μήνυμα.
         cout << "Decrypted (and encoded) Plaintext = " << plaintext << "\n\n";
         //η αποκρυπτογράφηση έχει τελειώσει, εδώ γίνεται decode (από αριθμό σε string το μήνυμα)
-        string decoded = CryptoBase::decimal_to_english(plaintext);
+        const string decoded = CryptoBase::decimal_to_english(plaintext);
         if (decoded.empty()) {
             cout << "Could not decode the number!\n";
             return -1;
