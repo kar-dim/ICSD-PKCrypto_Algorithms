@@ -31,10 +31,7 @@ void CryptoRabin::print_parameters() const {
 
 Mpz CryptoRabin::english_to_decimal(const string &word) const {
     string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    if (characters_as_numbers.empty())
-        return Mpz();
-    //return padded characters
-    return Mpz(characters_as_numbers + "111111111111");
+    return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers + "111111111111");
 }
 
 bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz ciphertexts[]) {
@@ -52,10 +49,8 @@ Mpz CryptoRabin::decrypt(const Mpz ciphertexts[]) {
     cout << "b = " << b << "\n\n";
     cout << "d (MUST BE 1) = " << gcd_a_b << "\n\n";
     //αν gcd(a,b) δεν είναι 1 τότε σφάλμα
-    if (gcd_a_b != 1) {
-        cout << "Error trying to initialize the decryption process! Exiting...";
+    if (gcd_a_b != 1)
         return Mpz();
-    }
 
     //ευρεση των 4 πιθανων plaintexts
     Mpz x, y, mx_mod_n, my_mod_n;
@@ -67,11 +62,8 @@ Mpz CryptoRabin::decrypt(const Mpz ciphertexts[]) {
     cout << "2) y = " << y << "\n\n";
     cout << "3) -x MOD n = " << mx_mod_n << "\n\n";
     cout << "4) -y MOD n = " << my_mod_n << "\n\n";
-    //βρίσκουμε ποιό από τα 4 είναι το σωστό
-    Mpz correct_plaintext = get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
-    if (correct_plaintext.is_empty())
-        cout << "Could not decrypt, none of the plaintext are correct";
-    return correct_plaintext;
+    //βρίσκουμε ποιό από τα 4 είναι το σωστό (αν δε βρεθει επιστρεφεται empty Mpz)
+    return get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
 }
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1

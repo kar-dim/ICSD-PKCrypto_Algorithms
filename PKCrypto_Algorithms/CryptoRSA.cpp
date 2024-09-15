@@ -6,7 +6,7 @@
 using std::cout;
 using gmp::Mpz;
 
-CryptoRSA::CryptoRSA(): CryptoBase() {
+CryptoRSA::CryptoRSA() {
     e = e_value;
     do {
         //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
@@ -34,7 +34,6 @@ void CryptoRSA::print_parameters() const {
 bool CryptoRSA::e_euclid() {
     Mpz t, q, q_mul_p0;
     Mpz e_copy(e), p0(0), p1(1), totient_copy(totient);
-    const Mpz m0(totient); //m0 είναι το αρχικό m, σε περίπτωση που βγει αρνητικό το αποτέλεσμα να το προσθέσουμε κατά m
 
     //περίπτωση όπου a*p1 mod 1 = 1 mod 1. -> a*p1 mod 1 = 0. Η ομάδα έχει 1 στοιχείο, το {0}
     if (totient == 1)
@@ -54,7 +53,7 @@ bool CryptoRSA::e_euclid() {
     }
     //αν ο inverse είναι αρνητικός τον κάνουμε θετικό κατά m0 = το αρχικό m για να οριζεται στο (0, m-1)
     if (p1 < 0)
-        p1 += m0;
+        p1 += totient;
     //d=p1, το private key είναι ο inverse
     d = p1;
     return true;
