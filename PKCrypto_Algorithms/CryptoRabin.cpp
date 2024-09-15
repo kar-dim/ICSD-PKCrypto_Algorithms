@@ -30,7 +30,7 @@ void CryptoRabin::print_parameters() const {
 }
 
 Mpz CryptoRabin::english_to_decimal(const string &word) const {
-    string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
+    const string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
     return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers + "111111111111");
 }
 
