@@ -61,10 +61,7 @@ string CryptoBase::english_to_decimal_str(const string& word) const {
 //συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
 Mpz CryptoBase::english_to_decimal(const string &word) const {
     const string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    if (characters_as_numbers.empty())
-        return Mpz();
-    //store σε GNU MP array
-    return Mpz(characters_as_numbers);
+    return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers);
 }
 
 size_t CryptoBase::get_public_key_size() const
@@ -80,11 +77,11 @@ string CryptoBase::decimal_to_english(const Mpz& number) {
         return "";
     //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
     if (should_pad) {
-        std::memcpy(number_buff + 1, number_buff, size);
+        std::memmove(number_buff + 1, number_buff, size);
         number_buff[0] = '0';
         number_buff[++size] = '\0';
     }
-        
+    
     string decoded_output;
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
