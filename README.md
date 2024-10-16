@@ -1,18 +1,18 @@
 # ICSD PKCrypto Algorithms
-Υλοποίηση μερικών γνωστών αλγορίθμων Public Key (RSA, Rabin, ElGamal) για (απο)κρυπτογράφηση κειμένου με χρήση της GNU MP (C++). Εργασία που εκπονήθηκε κατα τη διάρκεια της φοίτησης (2013-2019) στο Τμήμα Μηχανικών Πληροφοριακών και Επικοινωνιακών Συστημάτων.
+Implementation of various Public Key Algorithms (RSA, Rabin, ElGamal) by using GNU MP library. Part of my university coursework (2013-2019, Information and Communications Systems Engineering, University of the Aegean).
 
-Η εγκατάσταση της GNU MP μπορει να γίνει μέσω του vcpkg:
+GNU MP can be installed via vcpkg:
 
 ```git clone https://github.com/Microsoft/vcpkg.git```
 
 
 ```.\vcpkg\bootstrap-vcpkg.bat```
 
-Εγκατάσταση vcpkg GMP:
+Install GNU MP:
 
 ```vcpkg install gmp```
 
-Integration vcpkg packages με MSBuild projects:
+Integration vcpkg packages with MSBuild projects:
 
 ```vcpkg integrate install```
 
