@@ -9,6 +9,7 @@ private:
 	gmp::Mpz p, g, a, public_key;
 public:
 	CryptoElGamal();
+	CryptoElGamal(const gmp::Mpz& p, const gmp::Mpz& a);
 	~CryptoElGamal() = default;
 	void print_parameters() const override;
 	bool encrypt(const gmp::Mpz& cleartext, gmp::Mpz ciphertexts[]) override;

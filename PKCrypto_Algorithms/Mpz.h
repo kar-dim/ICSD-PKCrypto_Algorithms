@@ -57,6 +57,7 @@ namespace gmp {
 		Mpz operator/(const Mpz& other) const;
 		void operator/=(const ulong n);
 		void operator/=(const Mpz& other);
+		char* get_str(char* str, int base) const;
 		friend std::ostream& operator<<(std::ostream& os, const Mpz& mpz);
 
 		//helper methods

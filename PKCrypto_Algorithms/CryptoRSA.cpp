@@ -2,11 +2,12 @@
 #include "CryptoRSA.h"
 #include "Mpz.h"
 #include <iostream>
+#include <stdexcept>
 
 using std::cout;
 using gmp::Mpz;
 
-CryptoRSA::CryptoRSA() {
+CryptoRSA::CryptoRSA() : CryptoBase() {
     e = e_value;
     do {
         //πρέπει να αρχικοποιήσουμε το p και το q ώστε να είναι prime
@@ -22,6 +23,14 @@ CryptoRSA::CryptoRSA() {
         //ευρεση του (phi) totient = (p-1)(q-1)
         totient = (p - 1) * (q - 1);
     } while (!e_euclid());
+}
+
+//constructor για αρχικοποίηση με σταθερά p,q (κυρίως για test)
+//p και q πρέπει να είναι valid, δηλαδή να υπάρχει ο αντίστροφος στο euclid test, αλλιώς πετάμε exception
+CryptoRSA::CryptoRSA(const Mpz& p, const Mpz& q) : CryptoBase(), e(e_value), p(p), q(q), n(p * q), totient((p - 1)* (q - 1)) {
+	public_key_size = n.size_in_bits();
+	if (!e_euclid())
+		throw std::invalid_argument("p and q do not pass the euclid test!");
 }
 
 void CryptoRSA::print_parameters() const {

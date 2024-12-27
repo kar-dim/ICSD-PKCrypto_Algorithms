@@ -11,6 +11,7 @@ private:
 	bool e_euclid();
 public:
 	CryptoRSA();
+	CryptoRSA(const gmp::Mpz& p, const gmp::Mpz& q);
 	~CryptoRSA() = default;
 	void print_parameters() const override;
 	bool encrypt(const gmp::Mpz& cleartext, gmp::Mpz ciphertexts[]) override;

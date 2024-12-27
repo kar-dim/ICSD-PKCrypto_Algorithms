@@ -1,4 +1,5 @@
-﻿#include "CryptoRabin.h"
+﻿#include "CryptoBase.h"
+#include "CryptoRabin.h"
 #include "Mpz.h"
 #include <cstring>
 #include <iostream>
@@ -9,7 +10,7 @@ using std::cout;
 using std::string;
 using gmp::Mpz;
 
-CryptoRabin::CryptoRabin()
+CryptoRabin::CryptoRabin() : CryptoBase()
 {
     //ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3
     while (true) {
@@ -24,6 +25,9 @@ CryptoRabin::CryptoRabin()
     n = p * q;
     public_key_size = n.size_in_bits();
 }
+
+//constructor για αρχικοποίηση με σταθερά p,q (κυρίως για test)
+CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { public_key_size = n.size_in_bits(); }
 
 void CryptoRabin::print_parameters() const {
     cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n";

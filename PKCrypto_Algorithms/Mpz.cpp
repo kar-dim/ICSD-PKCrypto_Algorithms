@@ -249,6 +249,11 @@ std::ostream& gmp::operator<<(std::ostream& os, const Mpz& mpz)
 	return os;
 }
 
+char* gmp::Mpz::get_str(char* str, int base) const
+{
+	return mpz_get_str(str, base, _value);
+}
+
 bool Mpz::is_empty() const {
 	return _value[0]._mp_alloc == 0;
 }

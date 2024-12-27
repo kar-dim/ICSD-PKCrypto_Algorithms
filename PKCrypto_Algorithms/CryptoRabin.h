@@ -17,6 +17,7 @@ private:
 	gmp::Mpz get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n) const;
 public:
 	CryptoRabin();
+	CryptoRabin(const gmp::Mpz& p, const gmp::Mpz& q);
 	~CryptoRabin() = default;
 	void print_parameters() const override;
 	gmp::Mpz english_to_decimal(const std::string& word) const override;

@@ -1,11 +1,12 @@
-﻿#include "CryptoElGamal.h"
+﻿#include "CryptoBase.h"
+#include "CryptoElGamal.h"
 #include "Mpz.h"
 #include <iostream>
 
 using std::cout;
 using gmp::Mpz;
 
-CryptoElGamal::CryptoElGamal()
+CryptoElGamal::CryptoElGamal() : CryptoBase()
 {
     //p: random prime
     while (true) {
@@ -28,6 +29,11 @@ CryptoElGamal::CryptoElGamal()
     }
     //a = private key, υπολογίζουμε το g^a mod p που ειναι το public key
     public_key = Mpz::powm(g, a, p);
+}
+
+//constructor για αρχικοποίηση με σταθερά p,a (κυρίως για test)
+CryptoElGamal::CryptoElGamal(const Mpz &p, const Mpz &a) : CryptoBase(), p(p), g( (p - 1) / 2), a(a), public_key(Mpz::powm(g, a, p)) { 
+    public_key_size = p.size_in_bits();
 }
 
 void CryptoElGamal::print_parameters() const {
