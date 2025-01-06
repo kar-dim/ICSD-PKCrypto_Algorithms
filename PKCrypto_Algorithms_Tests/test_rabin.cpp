@@ -43,6 +43,5 @@ TEST_F(TestFixtureRabin, Decrypt) {
 
 //Decode test
 TEST_F(TestFixtureRabin, Decode) {
-    const std::string decoded = CryptoBase::decimal_to_english(plaintext_input_ascii);
-    EXPECT_FALSE(decoded.empty());
+    EXPECT_FALSE(CryptoBase::decimal_to_english(plaintext_input_ascii).empty());
 }
