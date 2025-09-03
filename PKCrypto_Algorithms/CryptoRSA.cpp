@@ -3,6 +3,7 @@
 #include "Mpz.h"
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 using std::cout;
 using gmp::Mpz;
@@ -68,13 +69,13 @@ bool CryptoRSA::e_euclid() {
     return true;
 }
 
-bool CryptoRSA::encrypt(const Mpz& cleartext, Mpz ciphertexts[]) {
+bool CryptoRSA::encrypt(const Mpz& cleartext, std::vector<Mpz>& ciphertext) {
     if (cleartext.size_in_bits() > public_key_size - 1)
         return false;
-    ciphertexts[0] = Mpz::powm(cleartext, e, n);
+    ciphertext[0] = Mpz::powm(cleartext, e, n);
     return true;
 }
 
-Mpz CryptoRSA::decrypt(const Mpz ciphertexts[]) {
-    return Mpz::powm(ciphertexts[0], d, n);
+Mpz CryptoRSA::decrypt(const std::vector<Mpz>& ciphertext) {
+    return Mpz::powm(ciphertext[0], d, n);
 }

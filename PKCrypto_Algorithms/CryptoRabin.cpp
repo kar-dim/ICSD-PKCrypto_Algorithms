@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 using std::cout;
 using std::string;
@@ -38,14 +39,14 @@ Mpz CryptoRabin::english_to_decimal(const string &word) const {
     return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers + "111111111111");
 }
 
-bool CryptoRabin::encrypt(const Mpz &plaintext, Mpz ciphertexts[]) {
+bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
     if (plaintext.size_in_bits() > public_key_size - 1)
         return false;
-    ciphertexts[0] = Mpz::powm_ui(plaintext, 2, n);
+    ciphertext[0] = Mpz::powm_ui(plaintext, 2, n);
     return true;
 }
 
-Mpz CryptoRabin::decrypt(const Mpz ciphertexts[]) {
+Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) {
     Mpz a, b, gcd_a_b;
     e_euclid(a, b, gcd_a_b);
     //εκτύπωση των a,b και του gcd(a,b)=1
@@ -59,7 +60,7 @@ Mpz CryptoRabin::decrypt(const Mpz ciphertexts[]) {
     //ευρεση των 4 πιθανων plaintexts
     Mpz x, y, mx_mod_n, my_mod_n;
     //υπολογίζουμε τα r,s,x,y
-    calculate_four_candidates(ciphertexts[0], a, b, x, mx_mod_n, y, my_mod_n);
+    calculate_four_candidates(ciphertext[0], a, b, x, mx_mod_n, y, my_mod_n);
 
     //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
     cout << "1) x = " << x << "\n\n";

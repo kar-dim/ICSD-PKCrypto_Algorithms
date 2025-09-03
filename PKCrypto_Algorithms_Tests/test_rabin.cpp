@@ -1,6 +1,6 @@
-﻿#include "../PKCrypto_Algorithms/CryptoBase.h"
-#include "../PKCrypto_Algorithms/CryptoRabin.h"
-#include "../PKCrypto_Algorithms/Mpz.h"
+﻿#include "CryptoBase.h"
+#include "CryptoRabin.h"
+#include "Mpz.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -13,7 +13,9 @@ protected:
     std::unique_ptr<CryptoBase> crypto;
     const Mpz plaintext_input_ascii{ "114097098105110" };
     const Mpz plaintext_input_ascii_padded { "114097098105110111111111111" };
-    const Mpz expected_ciphertext_output{ "13018147796007121307518802099101879433432320987654321" };
+    const std::vector<Mpz> expected_ciphertext_output = {
+       Mpz("13018147796007121307518802099101879433432320987654321")
+	};
 
     void SetUp() override {
         const Mpz p("278239804937272062342465215710021372388608714560106972047259");
@@ -31,14 +33,14 @@ TEST_F(TestFixtureRabin, Initialize) {
 
 //Encryption test
 TEST_F(TestFixtureRabin, Encrypt) {
-    Mpz ciphertext[1];
+    std::vector<Mpz> ciphertext(1);
     EXPECT_TRUE(crypto->encrypt(plaintext_input_ascii_padded, ciphertext));
-    EXPECT_EQ(expected_ciphertext_output, *ciphertext);
+    EXPECT_EQ(expected_ciphertext_output[0], ciphertext[0]);
 }
 
 //Decryption test
 TEST_F(TestFixtureRabin, Decrypt) {
-    EXPECT_EQ(plaintext_input_ascii, crypto->decrypt(&expected_ciphertext_output));
+    EXPECT_EQ(plaintext_input_ascii, crypto->decrypt(expected_ciphertext_output));
 }
 
 //Decode test

@@ -1,6 +1,6 @@
-﻿#include "../PKCrypto_Algorithms/CryptoBase.h"
-#include "../PKCrypto_Algorithms/CryptoRSA.h"
-#include "../PKCrypto_Algorithms/Mpz.h"
+﻿#include "CryptoBase.h"
+#include "CryptoRSA.h"
+#include "Mpz.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -12,7 +12,9 @@ class TestFixtureRSA : public ::testing::Test {
 protected:
 	std::unique_ptr<CryptoBase> crypto;
     const Mpz plaintext_input_ascii{ "114115097" };
-    const Mpz expected_ciphertext_output{ "128212436976942807447413894514432885776652830497951807113198484535557160392454182204316361112687085168409355387650354089155794757738165712183136300248779823023574084443168737483906637122571684435775963759543805898098787897589659804888921079229753610277091770004039582269759641796106125267346283729667979719743" };
+    const std::vector<Mpz> expected_ciphertext_output = {
+        Mpz("128212436976942807447413894514432885776652830497951807113198484535557160392454182204316361112687085168409355387650354089155794757738165712183136300248779823023574084443168737483906637122571684435775963759543805898098787897589659804888921079229753610277091770004039582269759641796106125267346283729667979719743")
+    };
     
     void SetUp() override {
         const Mpz p("13174922939916297218567908474472490669546617046697150383644923516954371230034079308682703266474399778008345185926649826166595706429011056878196896853120041");
@@ -30,14 +32,14 @@ TEST_F(TestFixtureRSA, Initialize) {
 
 //Encryption test
 TEST_F(TestFixtureRSA, Encrypt) {
-    Mpz ciphertext[1];
+    std::vector<Mpz> ciphertext(1);
     EXPECT_TRUE(crypto->encrypt(plaintext_input_ascii, ciphertext));
-    EXPECT_EQ(expected_ciphertext_output, *ciphertext);
+    EXPECT_EQ(expected_ciphertext_output[0], ciphertext[0]);
 }
 
 //Decryption test
 TEST_F(TestFixtureRSA, Decrypt) {
-	EXPECT_EQ(plaintext_input_ascii, crypto->decrypt(&expected_ciphertext_output));
+	EXPECT_EQ(plaintext_input_ascii, crypto->decrypt(expected_ciphertext_output));
 }
 
 //Decode test

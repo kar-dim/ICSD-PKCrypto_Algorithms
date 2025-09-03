@@ -1,9 +1,10 @@
-﻿#include "../PKCrypto_Algorithms/CryptoBase.h"
-#include "../PKCrypto_Algorithms/CryptoElGamal.h"
-#include "../PKCrypto_Algorithms/Mpz.h"
+﻿#include "CryptoBase.h"
+#include "CryptoElGamal.h"
+#include "Mpz.h"
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 using namespace gmp;
 using std::cout;
@@ -12,9 +13,9 @@ class TestFixtureElGamal : public ::testing::Test {
 protected:
     std::unique_ptr<CryptoBase> crypto;
     const Mpz plaintext_input_ascii{ "101108103097109097108" };
-	const Mpz expected_ciphertext_output[2] = { 
-        Mpz("1052772789544382235860844005795479865693153932887382852999755"), 
-        Mpz("352381922911315976334440827559600986832987595461615796109178") 
+    const std::vector<Mpz> expected_ciphertext_output = {
+       Mpz("1052772789544382235860844005795479865693153932887382852999755"),
+       Mpz("352381922911315976334440827559600986832987595461615796109178")
     };
 
 	//Στο ElGamal συγκεκριμένα, το private key (a) παράγεται τυχαία, για να έχουμε ντετερμινιστικά αποτελέσματα
@@ -37,7 +38,7 @@ TEST_F(TestFixtureElGamal, Initialize) {
 //το αποτελεσμα της κρυπτογράφησης δεν είναι σταθερό, ακόμα και με σταθερά public/private keys
 //μπορύμε να ελέγξουμε αν απλώς πέτυχε η κρυπτογράφηση
 TEST_F(TestFixtureElGamal, Encrypt) {
-    Mpz ciphertext[2];
+    std::vector<Mpz> ciphertext(2);
     EXPECT_TRUE(crypto->encrypt(plaintext_input_ascii, ciphertext));
 	EXPECT_TRUE(!ciphertext[0].is_empty() && !ciphertext[1].is_empty());
 }

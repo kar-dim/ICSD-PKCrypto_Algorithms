@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CryptoBase.h"
 #include "Mpz.h"
+#include <vector>
 
 class CryptoRSA : public CryptoBase
 {
@@ -14,7 +15,7 @@ public:
 	CryptoRSA(const gmp::Mpz& p, const gmp::Mpz& q);
 	~CryptoRSA() = default;
 	void print_parameters() const override;
-	bool encrypt(const gmp::Mpz& cleartext, gmp::Mpz ciphertexts[]) override;
-	gmp::Mpz decrypt(const gmp::Mpz ciphertexts[]) override;
+	bool encrypt(const gmp::Mpz& cleartext, std::vector<gmp::Mpz>& ciphertext) override;
+	gmp::Mpz decrypt(const std::vector<gmp::Mpz>& ciphertext) override;
 };
 
