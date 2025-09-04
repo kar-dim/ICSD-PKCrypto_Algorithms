@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
         crypto = std::make_unique<CryptoRSA>();
     else if (crypto_method.compare("elgamal") == 0) {
         crypto = std::make_unique<CryptoElGamal>();
-		ciphertext.resize(2); //elgamal has 2 ciphertext numbers
+		ciphertext.resize(2); //elgamal έχει 2 ciphertext
     }
     else if (crypto_method.compare("rabin") == 0)
         crypto = std::make_unique<CryptoRabin>();

@@ -35,8 +35,12 @@ void CryptoRabin::print_parameters() const {
 }
 
 Mpz CryptoRabin::english_to_decimal(const string &word) const {
-    const string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers + "111111111111");
+	Mpz encoded = CryptoBase::english_to_decimal(word);
+    Mpz redundancy("111111111111");
+    Mpz factor = Mpz::pow_ui(10, 12);
+    encoded *= factor;
+    encoded += redundancy;
+    return encoded;
 }
 
 bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
@@ -131,50 +135,36 @@ void CryptoRabin::calculate_four_candidates(const Mpz& ciphertext, const Mpz& a,
     my_mod_n = -y % n;
 }
 
-//βοηθητική μέθοδος για έλεγχο των decrypted plaintext
-bool CryptoRabin::check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const {
-    return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
-}
-//βοηθητική μέθοδος για να γεμισει το τελικο plaintext με βαση το decrypted plaintext (αν ειναι το σωστο, αλλιως δεν κανει τιποτα)
-void CryptoRabin::check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const size_t size, string &buf) const {
-    if (is_correct)
-       buf.append(chars.get(), size - 12);
-}
-
 //εύρεση του σωστού plaintext
 Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx_mod_n, const Mpz& my_mod_n) const {
     //x*x max = 2x bits
     const int max_size = key_factors_max_size * 2;
-    std::unique_ptr<char[]>x_chars(new char[max_size]);
-    std::unique_ptr<char[]>y_chars(new char[max_size]);
-    std::unique_ptr<char[]>mx_chars(new char[max_size]);
-    std::unique_ptr<char[]>my_chars(new char[max_size]);
-    //κάνουμε "dump" στους buffer arrays τους αριθμούς
-    int size_x = x.sprintf(x_chars.get(), "%Zd");
-    int size_y = y.sprintf(y_chars.get(), "%Zd");
-    int size_mx = mx_mod_n.sprintf(mx_chars.get(), "%Zd");
-    int size_my = my_mod_n.sprintf(my_chars.get(), "%Zd");
+    const Mpz* inputs[] = { &x, &y, &mx_mod_n, &my_mod_n };
 
-    //αν κάποιο δε διαβάστηκε σωστά τότε οι παραμέτροι είναι λάθος
-    if (size_x < 0 || size_y < 0 || size_mx < 0 || size_my < 0)
-        return Mpz();
+    std::unique_ptr<char[]> buffers[4] = { 
+        std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size)
+    };
 
-    //έλεγχος των 12 τελευταίων ψηφίων για κάθε buffer array: αν είναι όλα όσο το padded τότε τους αφαιρούμε
-    //και επιστρέφουμε το plaintext
-    const bool is_x = check_plaintext_chars(x_chars, size_x);
-    const bool is_y = check_plaintext_chars(y_chars, size_y);
-    const bool is_mx = check_plaintext_chars(mx_chars, size_mx);
-    const bool is_my = check_plaintext_chars(my_chars, size_my);
-
-    if (is_x == false && is_y == false && is_mx == false && is_my == false)
-        return Mpz();
+    int sizes[4];
+    for (int i = 0; i < 4; ++i) {
+        sizes[i] = inputs[i]->sprintf(buffers[i].get(), "%Zd");
+        if (sizes[i] < 0)
+            return Mpz();
+    }
 
     string buf;
-    check_and_retrieve_plaintext(is_x, x_chars, size_x, buf);
-    check_and_retrieve_plaintext(is_y, y_chars, size_y, buf);
-    check_and_retrieve_plaintext(is_mx, mx_chars, size_mx, buf);
-    check_and_retrieve_plaintext(is_my, my_chars, size_my, buf);
-    
+    bool any_correct = false;
+    for (int i = 0; i < 4; ++i) {
+        const bool is_correct = check_plaintext_chars(buffers[i], sizes[i]);
+        if (is_correct) {
+            buf.append(buffers[i].get(), sizes[i] - 12); //αφαίρεση padding
+            any_correct = true;
+        }
+    }
+
+    if (!any_correct)
+        return Mpz();
+
     Mpz correct_plaintext;
     correct_plaintext.sscanf(buf.c_str(), "%Zd");
     return correct_plaintext;

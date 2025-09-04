@@ -7,14 +7,8 @@
 
 class CryptoBase
 {
-private:
-	static constexpr int maxPlaintextChars = 2048;
 protected:
     gmp_randstate_t state; //random state χρειάζεται για να δουλέψουν οι αλγόριθμοι παραγωγής τυχαίων
-	static int number_of_digits(const int n);
-	//συνάρτηση για εύρεση του n-οστου ψηφίου ενός αριθμού ξεκινοντας άπό το λιγότερο σήμαντικό ψηφίο
-	static int get_digit(const int num, const int n);
-	std::string english_to_decimal_str(const std::string& word) const;
 	size_t public_key_size;
 public:
 	CryptoBase();

@@ -14,7 +14,7 @@ Mpz::Mpz(const ulong n) {
 	mpz_init_set_ui(_value, n);
 }
 
-Mpz::Mpz(const string str)
+Mpz::Mpz(const string& str)
 {
 	mpz_init_set_str(_value, str.c_str(), 10);
 }
@@ -115,7 +115,7 @@ Mpz& Mpz::operator=(const ulong n) {
 	return *this;
 }
 
-Mpz& Mpz::operator=(const string str)
+Mpz& Mpz::operator=(const string& str)
 {
 	mpz_set_str(_value, str.c_str(), 10);
 	return *this;
@@ -271,8 +271,7 @@ int Mpz::sscanf(const char* a, const char* b) const {
 	return gmp_sscanf(a, b, _value);
 }
 
-/*static methods below */
-
+/*static methods */
 int Mpz::probab_prime_p(const Mpz& a, const int n) {
 	return mpz_probab_prime_p(a._value, n);
 }
@@ -293,4 +292,14 @@ Mpz Mpz::powm_ui(const Mpz& a, const ulong n, const Mpz& b) {
 	Mpz mpz;
 	mpz_powm_ui(mpz._value, a._value, n, b._value);
 	return mpz;
+}
+
+Mpz Mpz::pow_ui(const ulong base, const ulong exp) {
+	Mpz result;
+	mpz_ui_pow_ui(result._value, base, exp);
+	return result;
+}
+
+unsigned int Mpz::get_ui(const Mpz& a) {
+	return mpz_get_ui(a._value);
 }

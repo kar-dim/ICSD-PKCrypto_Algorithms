@@ -1,6 +1,7 @@
 #pragma once
 #include "CryptoBase.h"
 #include "Mpz.h"
+#include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,8 +13,9 @@ private:
 	gmp::Mpz p, q, n;
 	void e_euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& gcd_a_b) const;
 	void euclid(const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) const;
-	void check_and_retrieve_plaintext(const bool is_correct, const std::unique_ptr<char[]>& chars, const size_t size, std::string& buf) const;
-	bool check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const;
+	inline bool check_plaintext_chars(const std::unique_ptr<char[]>& chars, const int size) const {
+		return std::memcmp(chars.get() + size - 12, "11111111111", 11) == 0;
+	}
 	void calculate_four_candidates(const gmp::Mpz& ciphertext, const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& mx_mod_n, gmp::Mpz& y, gmp::Mpz& my_mod_n) const;
 	gmp::Mpz get_correct_plaintext(const gmp::Mpz& x, const gmp::Mpz& y, const gmp::Mpz& mx_mod_n, const gmp::Mpz& my_mod_n) const;
 public:

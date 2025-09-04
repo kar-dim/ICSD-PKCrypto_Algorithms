@@ -1,9 +1,7 @@
 ﻿#include "CryptoBase.h"
 #include "Mpz.h"
-#include <cmath>
-#include <cstring>
+#include <algorithm>
 #include <ctime>
-#include <format>
 #include <gmp.h>
 #include <string>
 
@@ -20,46 +18,14 @@ CryptoBase::~CryptoBase() {
     gmp_randclear(state);
 }
 
-int CryptoBase::number_of_digits(const int n) {
-    if (n < 0) return -1;
-    int remainder = n;
-    int count = 0;
-    //μετράμε πόσες φορές γίνεται η διαίρεση με το 10
-    while (remainder != 0) {
-        remainder /= 10;
-        ++count;
-    }
-    return count;
-}
-
-//συνάρτηση για να βρούμε το n-οστό ψηφίο ενός αριθμού
-int CryptoBase::get_digit(const int num, const int n) {
-    int result = num % static_cast<int>(std::pow(10, n + 1));
-    //αν δε θέλουμε το τελευταίο ψηφίο χρειάζεται ακόμα μια διαίρεση
-    if (n > 0) {
-        result /= static_cast<int>(std::pow<int>(10, n));
-    }
-    return result;
-}
-
-string CryptoBase::english_to_decimal_str(const string& word) const {
-    string characters_as_numbers; //ένας τριψήφιος αριθμός είναι ένα γράμμα στο ASCII (pad με 0 μπροστά αν είναι διψήφιος)
-    for (auto i = 0; i < word.length(); i++) {
-        //παίρνουμε τη ASCII μορφή του χαρακτήρα
-        const int ascii_value = static_cast<int>(word[i]);
-        const int num_of_digits = CryptoBase::number_of_digits(ascii_value);
-        if (num_of_digits <= 1 || num_of_digits > 3)
-            return "";
-        //αν είναι 2ψήφιος τότε βάζουμε ένα 0 μπροστά
-        characters_as_numbers += std::format("{:03}", ascii_value);
-    }
-    return characters_as_numbers;
-}
-
-//συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (ASCII)
+//συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
 Mpz CryptoBase::english_to_decimal(const string &word) const {
-    const string characters_as_numbers = CryptoBase::english_to_decimal_str(word);
-    return characters_as_numbers.empty() ? Mpz() : Mpz(characters_as_numbers);
+    Mpz number(0);
+    for (unsigned char c : word) {
+        number *= 256;
+        number += c;
+    }
+    return number;
 }
 
 size_t CryptoBase::get_public_key_size() const
@@ -67,26 +33,15 @@ size_t CryptoBase::get_public_key_size() const
     return public_key_size;
 }
 
+//συναρτήση για τη αποκωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
 string CryptoBase::decimal_to_english(const Mpz& number) {
-    char number_buff[maxPlaintextChars] = { 0 };
-    int size = gmp_sprintf(number_buff, "%Zd", number());
-    const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
-    if (size > maxPlaintextChars || (should_pad && size + 1 > maxPlaintextChars))
-        return "";
-    //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
-    if (should_pad) {
-        std::memmove(number_buff + 1, number_buff, size);
-        number_buff[0] = '0';
-        number_buff[++size] = '\0';
+    Mpz n = number;
+    std::string result;
+    while (n > 0) {
+        result += static_cast<unsigned char>(Mpz::get_ui(n % 256));
+        n /= 256;
     }
-    
-    string decoded_output;
-    char temp_buf[4] = { 0 };
-    for (int i = 0; i < size / 3; i++) {
-        const char* p = &number_buff[i * 3];
-        const int number_value = (p[0] - '0') * 100 + (p[1] - '0') * 10 + (p[2] - '0');
-        decoded_output += static_cast<char>(number_value);
-    }
-    return decoded_output;
+    std::reverse(result.begin(), result.end());
+    return result;
 }
 

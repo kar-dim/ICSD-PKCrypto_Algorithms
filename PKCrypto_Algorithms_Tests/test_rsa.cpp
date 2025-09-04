@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 using namespace gmp;
 using std::cout;
@@ -11,14 +12,14 @@ using std::cout;
 class TestFixtureRSA : public ::testing::Test {
 protected:
 	std::unique_ptr<CryptoBase> crypto;
-    const Mpz plaintext_input_ascii{ "114115097" };
+    const Mpz plaintext_input{ "7500641" };
     const std::vector<Mpz> expected_ciphertext_output = {
-        Mpz("128212436976942807447413894514432885776652830497951807113198484535557160392454182204316361112687085168409355387650354089155794757738165712183136300248779823023574084443168737483906637122571684435775963759543805898098787897589659804888921079229753610277091770004039582269759641796106125267346283729667979719743")
+        Mpz("33867055612608072080291628746732225378260230374240448363928596079709585760334396972305963182402337849172182051508714348127014330615138107753331599208429211620093406323981603776836910084819325377304429798467990681888564218855202208266404024318108057241485446081837385924762128851462484197432944302258322103175")
     };
     
     void SetUp() override {
-        const Mpz p("13174922939916297218567908474472490669546617046697150383644923516954371230034079308682703266474399778008345185926649826166595706429011056878196896853120041");
-        const Mpz q("10524440994562082758573369754781353609847357361452562550995507517815311127791310031456280075943902699369026720841996900271872923300711438978484386631004087");
+        const Mpz p("8852829144581428394071570206879428522163295384022503410914791602446638486001274510899722945605044461868274036758818841550278016814872685510683733296349933");
+        const Mpz q("12893793985892681993155474887368231280457451623149307733018401758641484986371110269484871573822154316964139906841020343638781477145138458957939618526813391");
         crypto = std::make_unique<CryptoRSA>(p,q);
     }
 };
@@ -27,23 +28,23 @@ protected:
 TEST_F(TestFixtureRSA, Initialize) {
   const Mpz rsa_decimal_value = crypto->english_to_decimal("rsa");
   EXPECT_FALSE(rsa_decimal_value.is_empty());
-  EXPECT_EQ(plaintext_input_ascii, rsa_decimal_value);
+  EXPECT_EQ(plaintext_input, rsa_decimal_value);
 }
 
 //Encryption test
 TEST_F(TestFixtureRSA, Encrypt) {
     std::vector<Mpz> ciphertext(1);
-    EXPECT_TRUE(crypto->encrypt(plaintext_input_ascii, ciphertext));
+    EXPECT_TRUE(crypto->encrypt(plaintext_input, ciphertext));
     EXPECT_EQ(expected_ciphertext_output[0], ciphertext[0]);
 }
 
 //Decryption test
 TEST_F(TestFixtureRSA, Decrypt) {
-	EXPECT_EQ(plaintext_input_ascii, crypto->decrypt(expected_ciphertext_output));
+	EXPECT_EQ(plaintext_input, crypto->decrypt(expected_ciphertext_output));
 }
 
 //Decode test
 TEST_F(TestFixtureRSA, Decode) {
-    EXPECT_FALSE(CryptoBase::decimal_to_english(plaintext_input_ascii).empty());
+    EXPECT_FALSE(CryptoBase::decimal_to_english(plaintext_input).empty());
 }
     
