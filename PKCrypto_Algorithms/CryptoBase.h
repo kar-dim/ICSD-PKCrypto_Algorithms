@@ -7,6 +7,8 @@
 
 class CryptoBase
 {
+private:
+	static constexpr int maxPlaintextChars = 2048;
 protected:
     gmp_randstate_t state; //random state χρειάζεται για να δουλέψουν οι αλγόριθμοι παραγωγής τυχαίων
 	static int number_of_digits(const int n);

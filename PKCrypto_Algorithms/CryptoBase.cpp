@@ -1,14 +1,11 @@
 ﻿#include "CryptoBase.h"
 #include "Mpz.h"
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <format>
 #include <gmp.h>
 #include <string>
-
-#define MAX_PLAINTEXT_CHARS 2048
 
 using std::string;
 using gmp::Mpz;
@@ -71,10 +68,10 @@ size_t CryptoBase::get_public_key_size() const
 }
 
 string CryptoBase::decimal_to_english(const Mpz& number) {
-    char number_buff[MAX_PLAINTEXT_CHARS] = { 0 };
+    char number_buff[maxPlaintextChars] = { 0 };
     int size = gmp_sprintf(number_buff, "%Zd", number());
     const bool should_pad = number_buff[0] == '9' && (number_buff[1] == '7' || number_buff[1] == '8' || number_buff[1] == '9');
-    if (size > MAX_PLAINTEXT_CHARS || (should_pad && size + 1 > MAX_PLAINTEXT_CHARS))
+    if (size > maxPlaintextChars || (should_pad && size + 1 > maxPlaintextChars))
         return "";
     //pad με 0 αν το πρωτο γραμμα ειναι 'α', 'b' ή 'c' πχ "97" (α) -> "097"
     if (should_pad) {
@@ -86,8 +83,9 @@ string CryptoBase::decimal_to_english(const Mpz& number) {
     string decoded_output;
     char temp_buf[4] = { 0 };
     for (int i = 0; i < size / 3; i++) {
-        std::memcpy(temp_buf, &number_buff[i * 3], 3);
-        decoded_output += std::atoi(temp_buf);
+        const char* p = &number_buff[i * 3];
+        const int number_value = (p[0] - '0') * 100 + (p[1] - '0') * 10 + (p[2] - '0');
+        decoded_output += static_cast<char>(number_value);
     }
     return decoded_output;
 }

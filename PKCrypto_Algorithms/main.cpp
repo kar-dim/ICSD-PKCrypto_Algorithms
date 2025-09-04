@@ -12,7 +12,7 @@ using std::cout;
 using std::string;
 using gmp::Mpz;
 
-int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input, Mpz& decimal_value) {
+static int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input, Mpz& decimal_value) {
     cout << "Plaintext message = " << input << "\n\n";
     decimal_value = crypto->english_to_decimal(input);
     if (decimal_value.is_empty()) {
@@ -23,7 +23,7 @@ int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input, Mpz& 
     return 0;
 }
 
-int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal_value, std::vector<Mpz>& ciphertext) {
+static int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal_value, std::vector<Mpz>& ciphertext) {
     if (!crypto->encrypt(decimal_value, ciphertext)) {
         cout << "Failed to encrypt! Maximum allowed input size is: " << crypto->get_public_key_size() - 1 << " bits, input size is: " << decimal_value.size_in_bits() << " bits\n";
         return -1;
@@ -33,8 +33,7 @@ int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal_value,
     return 0;
 }
 
-int decrypt(std::unique_ptr<CryptoBase>& crypto, const std::vector<Mpz>& ciphertext, Mpz& decrypted, string& decoded)
-{
+static int decrypt(std::unique_ptr<CryptoBase>& crypto, const std::vector<Mpz>& ciphertext, Mpz& decrypted, string& decoded) {
     decrypted = crypto->decrypt(ciphertext);
     if (decrypted.is_empty()) {
         cout << "Could not decrypt!";
@@ -50,8 +49,7 @@ int decrypt(std::unique_ptr<CryptoBase>& crypto, const std::vector<Mpz>& ciphert
     return 0;
 }
 
-int process(std::unique_ptr<CryptoBase>& crypto, const string& input, std::vector<Mpz>& ciphertext)
-{
+static int process(std::unique_ptr<CryptoBase>& crypto, const string& input, std::vector<Mpz>& ciphertext) {
     crypto->print_parameters();
     //encode
     Mpz decimal_value;
