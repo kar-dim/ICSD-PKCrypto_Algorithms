@@ -145,8 +145,8 @@ Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx
         std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size)
     };
 
-    int sizes[4];
-    for (int i = 0; i < 4; ++i) {
+    int sizes[4] = { };
+    for (int i = 0; i < 4; i++) {
         sizes[i] = inputs[i]->sprintf(buffers[i].get(), "%Zd");
         if (sizes[i] < 0)
             return Mpz();
@@ -154,11 +154,12 @@ Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx
 
     string buf;
     bool any_correct = false;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const bool is_correct = check_plaintext_chars(buffers[i], sizes[i]);
         if (is_correct) {
             buf.append(buffers[i].get(), sizes[i] - 12); //αφαίρεση padding
             any_correct = true;
+            break;
         }
     }
 
