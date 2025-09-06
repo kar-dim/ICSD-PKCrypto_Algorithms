@@ -11,10 +11,9 @@ private:
 	static constexpr size_t key_factors_max_size = 200;
 	static const gmp::Mpz redundancy, redundancy_factor;
 
-	gmp::Mpz a, b, gcd_ab, p, q, n;
-	void e_euclid(gmp::Mpz& a, gmp::Mpz& b, gmp::Mpz& gcd_a_b) const;
-	void euclid(const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y, gmp::Mpz& d) const;
-	void calculate_candidates(const gmp::Mpz& ciphertext, const gmp::Mpz& a, const gmp::Mpz& b, std::array<gmp::Mpz, 4>& candidates) const;
+	gmp::Mpz a_p, b_q, p, q, n;
+	gmp::Mpz euclid(const gmp::Mpz& a, const gmp::Mpz& b, gmp::Mpz& x, gmp::Mpz& y) const;
+	void calculate_candidates(const gmp::Mpz& ciphertext, std::array<gmp::Mpz, 4>& candidates) const;
 	gmp::Mpz get_correct_plaintext(const std::array<gmp::Mpz, 4>& candidates) const;
 public:
 	CryptoRabin();

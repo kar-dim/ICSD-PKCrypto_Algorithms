@@ -19,14 +19,9 @@ CryptoRabin::CryptoRabin() : CryptoBase()
     while (true) {
         p = Mpz::urandomb(state, key_factors_max_size);
         q = Mpz::urandomb(state, key_factors_max_size);
-        if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1) {
-            if ((p % 4 == 3) && (q % 4 == 3)) {
-                e_euclid(a, b, gcd_ab);
-                if (gcd_ab == 1)
-                    break;
-            }
-        }
-        
+        if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1)
+            if ((p % 4 == 3) && (q % 4 == 3) && (euclid(p, q, a_p, b_q) == 1))
+                break;
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
@@ -34,7 +29,10 @@ CryptoRabin::CryptoRabin() : CryptoBase()
 }
 
 //constructor για αρχικοποίηση με σταθερά p,q (κυρίως για test)
-CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { public_key_size = n.size_in_base(2); }
+CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { 
+    public_key_size = n.size_in_base(2); 
+    euclid(p, q, a_p, b_q);
+}
 
 void CryptoRabin::print_parameters() const {
     cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n";
@@ -55,16 +53,10 @@ bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
 }
 
 Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) {
-    //εκτύπωση των a,b και του gcd(a,b)=1
-    cout << "a = " << a << "\n\n";
-    cout << "b = " << b << "\n\n";
-    cout << "d (MUST BE 1) = " << gcd_ab << "\n\n";
-
     //ευρεση των 4 πιθανων plaintexts
 	std::array<Mpz, 4> candidates;
     //υπολογίζουμε τα r,s,x,y
-    calculate_candidates(ciphertext[0], a, b, candidates);
-
+    calculate_candidates(ciphertext[0], candidates);
     //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
     cout << "1) x = " << candidates[0] << "\n\n";
     cout << "2) y = " << candidates[1] << "\n\n";
@@ -76,8 +68,8 @@ Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) {
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
 //(απευθείας εφαρμογή του βιβλίου "Handbook of Applied Cryptography" )
-void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) const {
-    Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb;
+Mpz CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y) const {
+    Mpz x1, x2, y1, y2, q, r, qx1, qy1, qb, d;
     Mpz a_copy(a), b_copy(b);
 
     //αν b=0 τοτε d=a, x=1, y=0.
@@ -85,7 +77,7 @@ void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) con
         d = a_copy;
         x = 1;
         y = 0;
-        return;
+        return d;
     }
 
     x2 = 1, x1 = 0, y2 = 0, y1 = 1;
@@ -107,23 +99,20 @@ void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) con
     d = a_copy;
     x = x2;
     y = y2;
-}
-
-void CryptoRabin::e_euclid(Mpz& s1, Mpz& s2, Mpz& gcd_s1_s2) const {
-    p > q ? euclid(p, q, s1, s2, gcd_s1_s2) : euclid(q, p, s1, s2, gcd_s1_s2);
+    return d;
 }
 
 //εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
-void CryptoRabin::calculate_candidates(const Mpz& ciphertext, const Mpz& a, const Mpz& b, std::array<Mpz, 4>& candidates) const {
+void CryptoRabin::calculate_candidates(const Mpz& ciphertext, std::array<Mpz, 4>& candidates) const {
     Mpz r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
     // r = c^((p+1)/4) MOD p
     r = Mpz::powm(ciphertext, (p + 1) / 4, p);
     // s = c^((q+1)/4) MOD q
     s = Mpz::powm(ciphertext, (q + 1) / 4, q);
     //aps, bqr
-    aps = a * p * s;
-    bqr = b * q * r;
+    aps = a_p * p * s;
+    bqr = b_q * q * r;
     // x = (aps + bqr) MOD n (1)
 	candidates[0] = (aps + bqr) % n;
     // y = (aps - bqr) MOD n (2)
