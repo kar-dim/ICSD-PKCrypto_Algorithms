@@ -109,8 +109,8 @@ void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) con
     y = y2;
 }
 
-void CryptoRabin::e_euclid(Mpz& s1, Mpz& s2, Mpz& gcd_a_b) const {
-    p > q ? euclid(p, q, s1, s2, gcd_a_b) : euclid(q, p, s1, s2, gcd_a_b);
+void CryptoRabin::e_euclid(Mpz& s1, Mpz& s2, Mpz& gcd_s1_s2) const {
+    p > q ? euclid(p, q, s1, s2, gcd_s1_s2) : euclid(q, p, s1, s2, gcd_s1_s2);
 }
 
 //εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
