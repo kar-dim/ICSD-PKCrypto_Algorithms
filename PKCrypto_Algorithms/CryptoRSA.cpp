@@ -70,7 +70,7 @@ bool CryptoRSA::e_euclid() {
 }
 
 bool CryptoRSA::encrypt(const Mpz& cleartext, std::vector<Mpz>& ciphertext) {
-    if (cleartext.size_in_base(2) > public_key_size - 1)
+    if (cleartext >= n)
         return false;
     ciphertext[0] = Mpz::powm(cleartext, e, n);
     return true;

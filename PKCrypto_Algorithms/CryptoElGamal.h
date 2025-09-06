@@ -7,7 +7,7 @@ class CryptoElGamal : public CryptoBase
 {
 private:
 	static constexpr size_t key_max_size = 200;
-	gmp::Mpz p, g, a, public_key;
+	gmp::Mpz p, p_sub_2, g, a, public_key;
 public:
 	CryptoElGamal();
 	CryptoElGamal(const gmp::Mpz& p, const gmp::Mpz& a);

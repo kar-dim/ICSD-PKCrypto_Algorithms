@@ -22,10 +22,10 @@ CryptoElGamal::CryptoElGamal() : CryptoBase()
 
     //εύρεση του a (το οποίο είναι ο εκθέτης στο g^a mod p το οποίο είναι το public key)
     //το α ειναι ενας τυχαιος στο διαστημα [0,p-2]
-    const Mpz p_minus_two = p - 2;
+    p_sub_2 = p - 2;
     while (true) {
         a = Mpz::urandomb(state, key_max_size);
-        if (a <= p_minus_two)
+        if (a <= p_sub_2)
             break;
     }
     //a = private key, υπολογίζουμε το g^a mod p που ειναι το public key
@@ -47,12 +47,11 @@ bool CryptoElGamal::encrypt(const Mpz &cleartext, std::vector<Mpz>& ciphertext) 
         return false;
 
     //δημιουργια του k, 1<=k<=p-2
-    const Mpz p_minus_two = p - 2;
     Mpz k;
     while (true) {
         k = Mpz::urandomb(state, key_max_size);
         //έλεγχος αν k<=p-2 και k>=1, αν ναι τοτε break
-        if (k <= p_minus_two && k >= 1)
+        if (k <= p_sub_2 && k >= 1)
             break;
     }
 
