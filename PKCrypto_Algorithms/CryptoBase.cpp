@@ -9,7 +9,6 @@ using std::string;
 using gmp::Mpz;
 
 CryptoBase::CryptoBase() {
-    public_key_size = 0;
     gmp_randinit_default(state); //αρχικοποίηση του random state
     gmp_randseed_ui(state, static_cast<ulong>(time(NULL)));
 }
@@ -26,11 +25,6 @@ Mpz CryptoBase::english_to_decimal(const string &word) const {
         number += c;
     }
     return number;
-}
-
-size_t CryptoBase::get_public_key_size() const
-{
-    return public_key_size;
 }
 
 //συναρτήση για τη αποκωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)

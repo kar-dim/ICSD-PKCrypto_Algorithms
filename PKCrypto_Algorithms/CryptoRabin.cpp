@@ -3,6 +3,7 @@
 #include "Mpz.h"
 #include <array>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -25,13 +26,17 @@ CryptoRabin::CryptoRabin() : CryptoBase()
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
-    public_key_size = n.size_in_base(2);
 }
 
 //constructor για αρχικοποίηση με σταθερά p,q (κυρίως για test)
-CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { 
-    public_key_size = n.size_in_base(2); 
-    euclid(p, q, a_p, b_q);
+CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) {
+    if (Mpz::probab_prime_p(p, 30) < 1 || Mpz::probab_prime_p(q, 30) < 1)
+        throw std::invalid_argument("p and/or q are not prime!");
+    if ((p % 4 != 3) || (q % 4 != 3))
+        throw std::invalid_argument("p and/or q are not 3 mod 4!");
+    Mpz d = euclid(p, q, a_p, b_q);
+    if (d != 1)
+		throw std::invalid_argument("p and q do not pass the euclid test!");
 }
 
 void CryptoRabin::print_parameters() const {
