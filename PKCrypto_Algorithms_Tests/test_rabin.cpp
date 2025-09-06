@@ -13,14 +13,14 @@ class TestFixtureRabin : public ::testing::Test {
 protected:
     std::unique_ptr<CryptoBase> crypto;
     const Mpz plaintext_input{ "491260111214" };
-    const Mpz plaintext_input_padded { "491260111214111111111111" };
+    const Mpz plaintext_input_padded { "49126011121411111111111" };
     const std::vector<Mpz> expected_ciphertext_output = {
-       Mpz("241336496870100817467399014287876520320987654321")
+       Mpz("2413364968701008174673980317676540920987654321")
 	};
 
     void SetUp() override {
-        const Mpz p("102442087274473255443956403406796931724421448609390521419111");
-        const Mpz q("557388090662613243894047376554730303133052043115785967135943");
+        const Mpz p("1552448376711806146933961250556285206393415076940930204017431");
+        const Mpz q("818532881486643100191582535937475171962230458225523898477431");
         crypto = std::make_unique<CryptoRabin>(p, q);
     }
 };

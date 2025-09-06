@@ -25,7 +25,7 @@ static int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input
 
 static int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal_value, std::vector<Mpz>& ciphertext) {
     if (!crypto->encrypt(decimal_value, ciphertext)) {
-        cout << "Failed to encrypt! Maximum allowed input size is: " << crypto->get_public_key_size() - 1 << " bits, input size is: " << decimal_value.size_in_bits() << " bits\n";
+        cout << "Could not encrypt!";
         return -1;
     }
 	for (const auto &cipher : ciphertext)

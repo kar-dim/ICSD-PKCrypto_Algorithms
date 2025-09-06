@@ -258,9 +258,9 @@ bool Mpz::is_empty() const {
 	return _value[0]._mp_alloc == 0;
 }
 
-std::size_t Mpz::size_in_bits() const
+std::size_t Mpz::size_in_base(const int base) const
 {
-	return mpz_sizeinbase(_value, 2);
+	return mpz_sizeinbase(_value, base);
 }
 
 int Mpz::sprintf(char* a, const char* b) const {
@@ -274,6 +274,13 @@ int Mpz::sscanf(const char* a, const char* b) const {
 /*static methods */
 int Mpz::probab_prime_p(const Mpz& a, const int n) {
 	return mpz_probab_prime_p(a._value, n);
+}
+
+Mpz gmp::Mpz::gcd(const Mpz& a, const Mpz& b)
+{
+	Mpz result;
+	mpz_gcd(result._value, a._value, b._value);
+	return result;
 }
 
 Mpz Mpz::urandomb(gmp_randstate_t state, mp_bitcnt_t num) {

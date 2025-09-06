@@ -15,7 +15,7 @@ CryptoElGamal::CryptoElGamal() : CryptoBase()
         if (Mpz::probab_prime_p(p, 30) >= 1)
             break;
     }
-    public_key_size = p.size_in_bits();
+    public_key_size = p.size_in_base(2);
 
     //Είναι σύνηθες να ισχύει (p-1) = 2g οπότε g (γεννήτορας Z*p) = (p-1)/2
     g = (p - 1) / 2;
@@ -34,7 +34,7 @@ CryptoElGamal::CryptoElGamal() : CryptoBase()
 
 //constructor για αρχικοποίηση με σταθερά p,a (κυρίως για test)
 CryptoElGamal::CryptoElGamal(const Mpz &p, const Mpz &a) : CryptoBase(), p(p), g( (p - 1) / 2), a(a), public_key(Mpz::powm(g, a, p)) { 
-    public_key_size = p.size_in_bits();
+    public_key_size = p.size_in_base(2);
 }
 
 void CryptoElGamal::print_parameters() const {
@@ -43,7 +43,7 @@ void CryptoElGamal::print_parameters() const {
 }
 
 bool CryptoElGamal::encrypt(const Mpz &cleartext, std::vector<Mpz>& ciphertext) {
-    if (cleartext.size_in_bits() > public_key_size - 1)
+    if (cleartext >= p)
         return false;
 
     //δημιουργια του k, 1<=k<=p-2

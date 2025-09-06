@@ -1,15 +1,16 @@
 ﻿#include "CryptoBase.h"
 #include "CryptoRabin.h"
 #include "Mpz.h"
-#include <cstring>
 #include <iostream>
-#include <memory>
 #include <string>
 #include <vector>
 
 using std::cout;
 using std::string;
 using gmp::Mpz;
+
+const Mpz CryptoRabin::redundancy = Mpz("11111111111");
+const Mpz CryptoRabin::redundancy_factor = Mpz::pow_ui(10, static_cast<ulong>(redundancy.size_in_base(10)));
 
 CryptoRabin::CryptoRabin() : CryptoBase()
 {
@@ -24,11 +25,11 @@ CryptoRabin::CryptoRabin() : CryptoBase()
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
-    public_key_size = n.size_in_bits();
+    public_key_size = n.size_in_base(2);
 }
 
 //constructor για αρχικοποίηση με σταθερά p,q (κυρίως για test)
-CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { public_key_size = n.size_in_bits(); }
+CryptoRabin::CryptoRabin(const Mpz& p, const Mpz& q) : CryptoBase(), p(p), q(q), n(p * q) { public_key_size = n.size_in_base(2); }
 
 void CryptoRabin::print_parameters() const {
     cout << "p = " << p << "\n\n" << "q = " << q << "\n\n" << "n = " << n << "\n\n";
@@ -36,15 +37,13 @@ void CryptoRabin::print_parameters() const {
 
 Mpz CryptoRabin::english_to_decimal(const string &word) const {
 	Mpz encoded = CryptoBase::english_to_decimal(word);
-    Mpz redundancy("111111111111");
-    Mpz factor = Mpz::pow_ui(10, 12);
-    encoded *= factor;
+    encoded *= redundancy_factor;
     encoded += redundancy;
     return encoded;
 }
 
 bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
-    if (plaintext.size_in_bits() > public_key_size - 1)
+   if (plaintext >= n || Mpz::gcd(plaintext, n) != 1)
         return false;
     ciphertext[0] = Mpz::powm_ui(plaintext, 2, n);
     return true;
@@ -137,36 +136,11 @@ void CryptoRabin::calculate_four_candidates(const Mpz& ciphertext, const Mpz& a,
 
 //εύρεση του σωστού plaintext
 Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx_mod_n, const Mpz& my_mod_n) const {
-    //x*x max = 2x bits
-    const int max_size = key_factors_max_size * 2;
-    const Mpz* inputs[] = { &x, &y, &mx_mod_n, &my_mod_n };
-
-    std::unique_ptr<char[]> buffers[4] = { 
-        std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size), std::make_unique<char[]>(max_size)
-    };
-
-    int sizes[4] = { };
+    const Mpz* candidates[] = { &x, &y, &mx_mod_n, &my_mod_n };
     for (int i = 0; i < 4; i++) {
-        sizes[i] = inputs[i]->sprintf(buffers[i].get(), "%Zd");
-        if (sizes[i] < 0)
-            return Mpz();
+        const Mpz& candidate = *candidates[i];
+        if (candidate % redundancy_factor == redundancy)
+            return candidate / redundancy_factor;
     }
-
-    string buf;
-    bool any_correct = false;
-    for (int i = 0; i < 4; i++) {
-        const bool is_correct = check_plaintext_chars(buffers[i], sizes[i]);
-        if (is_correct) {
-            buf.append(buffers[i].get(), sizes[i] - 12); //αφαίρεση padding
-            any_correct = true;
-            break;
-        }
-    }
-
-    if (!any_correct)
-        return Mpz();
-
-    Mpz correct_plaintext;
-    correct_plaintext.sscanf(buf.c_str(), "%Zd");
-    return correct_plaintext;
+    return Mpz();
 }

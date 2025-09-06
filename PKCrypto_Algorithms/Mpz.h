@@ -62,17 +62,18 @@ namespace gmp {
 
 		//helper methods
 		bool is_empty() const;
-		size_t size_in_bits() const;
+		size_t size_in_base(const int base) const;
 		int sprintf(char*, const char*) const;
 		int sscanf(const char*, const char*) const;
 
 		//static methods
-		static gmp::Mpz powm(const Mpz& a, const Mpz& b, const Mpz& c);
-		static gmp::Mpz powm_ui(const Mpz& a, const ulong n, const Mpz& b);
-		static gmp::Mpz pow_ui(const ulong base, const ulong exp);
+		static Mpz powm(const Mpz& a, const Mpz& b, const Mpz& c);
+		static Mpz powm_ui(const Mpz& a, const ulong n, const Mpz& b);
+		static Mpz pow_ui(const ulong base, const ulong exp);
 		static unsigned int get_ui(const Mpz& a);
-		static gmp::Mpz urandomb(gmp_randstate_t, mp_bitcnt_t);
+		static Mpz urandomb(gmp_randstate_t, mp_bitcnt_t);
 		static int probab_prime_p(const Mpz& a, const int num);
+		static Mpz gcd(const Mpz& a, const Mpz& b);
 	};
 }
 
