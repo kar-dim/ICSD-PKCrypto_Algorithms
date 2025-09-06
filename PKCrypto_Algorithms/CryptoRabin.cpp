@@ -1,6 +1,7 @@
 ﻿#include "CryptoBase.h"
 #include "CryptoRabin.h"
 #include "Mpz.h"
+#include <array>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -19,9 +20,13 @@ CryptoRabin::CryptoRabin() : CryptoBase()
         p = Mpz::urandomb(state, key_factors_max_size);
         q = Mpz::urandomb(state, key_factors_max_size);
         if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p(q, 30) >= 1) {
-            if ((p % 4 == 3) && (q % 4 == 3))
-                break;
+            if ((p % 4 == 3) && (q % 4 == 3)) {
+                e_euclid(a, b, gcd_ab);
+                if (gcd_ab == 1)
+                    break;
+            }
         }
+        
     }
     //εφόσον p,q είναι prime μπορούμε να υπολογίσουμε το n=pq
     n = p * q;
@@ -50,28 +55,23 @@ bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
 }
 
 Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) {
-    Mpz a, b, gcd_a_b;
-    e_euclid(a, b, gcd_a_b);
     //εκτύπωση των a,b και του gcd(a,b)=1
     cout << "a = " << a << "\n\n";
     cout << "b = " << b << "\n\n";
-    cout << "d (MUST BE 1) = " << gcd_a_b << "\n\n";
-    //αν gcd(a,b) δεν είναι 1 τότε σφάλμα
-    if (gcd_a_b != 1)
-        return Mpz();
+    cout << "d (MUST BE 1) = " << gcd_ab << "\n\n";
 
     //ευρεση των 4 πιθανων plaintexts
-    Mpz x, y, mx_mod_n, my_mod_n;
+	std::array<Mpz, 4> candidates;
     //υπολογίζουμε τα r,s,x,y
-    calculate_four_candidates(ciphertext[0], a, b, x, mx_mod_n, y, my_mod_n);
+    calculate_candidates(ciphertext[0], a, b, candidates);
 
     //εκτυπώνουμε τα 4 πιθανά plaintext (encoded). Ένα μόνο από αυτά είναι το σωστό
-    cout << "1) x = " << x << "\n\n";
-    cout << "2) y = " << y << "\n\n";
-    cout << "3) -x MOD n = " << mx_mod_n << "\n\n";
-    cout << "4) -y MOD n = " << my_mod_n << "\n\n";
+    cout << "1) x = " << candidates[0] << "\n\n";
+    cout << "2) y = " << candidates[1] << "\n\n";
+    cout << "3) -x MOD n = " << candidates[2] << "\n\n";
+    cout << "4) -y MOD n = " << candidates[3] << "\n\n";
     //βρίσκουμε ποιό από τα 4 είναι το σωστό (αν δε βρεθει επιστρεφεται empty Mpz)
-    return get_correct_plaintext(x, y, mx_mod_n, my_mod_n);
+    return get_correct_plaintext(candidates);
 }
 
 //επεκταμένος αλγόριθμος του Ευκλείδη που βρίσκει τα x,y ώστε ax + by = 1
@@ -109,13 +109,13 @@ void CryptoRabin::euclid(const Mpz &a, const Mpz& b, Mpz& x, Mpz& y, Mpz& d) con
     y = y2;
 }
 
-void CryptoRabin::e_euclid(Mpz& a, Mpz& b, Mpz& gcd_a_b) const {
-    p > q ? euclid(p, q, a, b, gcd_a_b) : euclid(q, p, b, a, gcd_a_b);
+void CryptoRabin::e_euclid(Mpz& s1, Mpz& s2, Mpz& gcd_a_b) const {
+    p > q ? euclid(p, q, s1, s2, gcd_a_b) : euclid(q, p, s1, s2, gcd_a_b);
 }
 
 //εύρεση 4 πιθανών plaintext από 1 rabin ciphertext
 //4 πιθανά plaintext: x,  -x MOD n, y, -y MOD n
-void CryptoRabin::calculate_four_candidates(const Mpz& ciphertext, const Mpz& a, const Mpz& b, Mpz& x, Mpz& mx_mod_n, Mpz& y, Mpz& my_mod_n) const {
+void CryptoRabin::calculate_candidates(const Mpz& ciphertext, const Mpz& a, const Mpz& b, std::array<Mpz, 4>& candidates) const {
     Mpz r, s, mx, my, p_plus_one, p_plus_one_div4, q_plus_one, q_plus_one_div4, ap, bq, aps, bqr, aps_plus_bqr, aps_minus_bqr;
     // r = c^((p+1)/4) MOD p
     r = Mpz::powm(ciphertext, (p + 1) / 4, p);
@@ -125,20 +125,18 @@ void CryptoRabin::calculate_four_candidates(const Mpz& ciphertext, const Mpz& a,
     aps = a * p * s;
     bqr = b * q * r;
     // x = (aps + bqr) MOD n (1)
-    x = (aps + bqr) % n;
+	candidates[0] = (aps + bqr) % n;
     // y = (aps - bqr) MOD n (2)
-    y = (aps - bqr) % n;
+	candidates[1] = (aps - bqr) % n;
     //-x mod n (3)
-    mx_mod_n = -x % n;
+	candidates[2] = -candidates[0] % n;
     //-y mod n (4)
-    my_mod_n = -y % n;
+	candidates[3] = -candidates[1] % n;
 }
 
 //εύρεση του σωστού plaintext
-Mpz CryptoRabin::get_correct_plaintext(const Mpz& x, const Mpz& y, const Mpz& mx_mod_n, const Mpz& my_mod_n) const {
-    const Mpz* candidates[] = { &x, &y, &mx_mod_n, &my_mod_n };
-    for (int i = 0; i < 4; i++) {
-        const Mpz& candidate = *candidates[i];
+Mpz CryptoRabin::get_correct_plaintext(const std::array<Mpz, 4>& candidates) const {
+    for (const auto& candidate : candidates) {
         if (candidate % redundancy_factor == redundancy)
             return candidate / redundancy_factor;
     }
