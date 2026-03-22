@@ -13,7 +13,7 @@ public:
 	CryptoElGamal(const gmp::Mpz& p, const gmp::Mpz& a);
 	~CryptoElGamal() = default;
 	void print_parameters() const override;
-	bool encrypt(const gmp::Mpz& cleartext, std::vector<gmp::Mpz>& ciphertext) override;
-	gmp::Mpz decrypt(const std::vector<gmp::Mpz>& ciphertext) override;
+	bool encrypt(const gmp::Mpz& cleartext, std::vector<gmp::Mpz>& ciphertext) const override;
+	gmp::Mpz decrypt(const std::vector<gmp::Mpz>& ciphertext) const override;
 };
 

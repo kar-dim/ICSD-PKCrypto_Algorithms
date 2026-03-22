@@ -50,14 +50,14 @@ Mpz CryptoRabin::english_to_decimal(const string &word) const {
     return encoded;
 }
 
-bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) {
+bool CryptoRabin::encrypt(const Mpz &plaintext, std::vector<Mpz>& ciphertext) const {
    if (plaintext >= n || Mpz::gcd(plaintext, n) != 1)
         return false;
     ciphertext[0] = Mpz::powm_ui(plaintext, 2, n);
     return true;
 }
 
-Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) {
+Mpz CryptoRabin::decrypt(const std::vector<Mpz>& ciphertext) const {
     //ευρεση των 4 πιθανων plaintexts
 	std::array<Mpz, 4> candidates;
     //υπολογίζουμε τα r,s,x,y

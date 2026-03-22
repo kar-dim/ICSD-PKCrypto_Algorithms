@@ -12,9 +12,9 @@ using std::cout;
 using std::string;
 using gmp::Mpz;
 
-static int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input, Mpz& decimal_value) {
+static int encode(const CryptoBase& crypto, const string& input, Mpz& decimal_value) {
     cout << "Plaintext message = " << input << "\n\n";
-    decimal_value = crypto->english_to_decimal(input);
+    decimal_value = crypto.english_to_decimal(input);
     if (decimal_value.is_empty()) {
         cout << "Failed to encode the word! Can't encrypt\n";
         return -1;
@@ -23,8 +23,8 @@ static int encode(const std::unique_ptr<CryptoBase>& crypto, const string& input
     return 0;
 }
 
-static int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal_value, std::vector<Mpz>& ciphertext) {
-    if (!crypto->encrypt(decimal_value, ciphertext)) {
+static int encrypt(const CryptoBase &crypto, const Mpz &decimal_value, std::vector<Mpz> &ciphertext) {
+    if (!crypto.encrypt(decimal_value, ciphertext)) {
         cout << "Could not encrypt!";
         return -1;
     }
@@ -33,8 +33,8 @@ static int encrypt(const std::unique_ptr<CryptoBase>& crypto, const Mpz& decimal
     return 0;
 }
 
-static int decrypt(std::unique_ptr<CryptoBase>& crypto, const std::vector<Mpz>& ciphertext, Mpz& decrypted, string& decoded) {
-    decrypted = crypto->decrypt(ciphertext);
+static int decrypt(const CryptoBase &crypto, const std::vector<Mpz> &ciphertext, Mpz &decrypted, string &decoded) {
+    decrypted = crypto.decrypt(ciphertext);
     if (decrypted.is_empty()) {
         cout << "Could not decrypt!";
         return -1;
@@ -49,8 +49,8 @@ static int decrypt(std::unique_ptr<CryptoBase>& crypto, const std::vector<Mpz>& 
     return 0;
 }
 
-static int process(std::unique_ptr<CryptoBase>& crypto, const string& input, std::vector<Mpz>& ciphertext) {
-    crypto->print_parameters();
+static int process(const CryptoBase &crypto, const string &input, std::vector<Mpz> &ciphertext) {
+    crypto.print_parameters();
     //encode
     Mpz decimal_value;
     if (encode(crypto, input, decimal_value) != 0)
@@ -87,6 +87,6 @@ int main(int argc, char** argv) {
         cout << "Wrong crypto method. Only 'rsa','elgamal' and 'rabin' allowed";
         return -1;
     }
-    return process(crypto, input, ciphertext);
+    return process(*crypto, input, ciphertext);
 }
 

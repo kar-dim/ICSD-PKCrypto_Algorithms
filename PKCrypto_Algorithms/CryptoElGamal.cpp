@@ -41,7 +41,7 @@ void CryptoElGamal::print_parameters() const {
          << "Public key = " << public_key << "\n\n" << "Private key = " << a << "\n\n";
 }
 
-bool CryptoElGamal::encrypt(const Mpz &cleartext, std::vector<Mpz>& ciphertext) {
+bool CryptoElGamal::encrypt(const Mpz &cleartext, std::vector<Mpz>& ciphertext) const {
     if (cleartext >= p)
         return false;
 
@@ -63,7 +63,7 @@ bool CryptoElGamal::encrypt(const Mpz &cleartext, std::vector<Mpz>& ciphertext) 
     return true;
 }
 
-Mpz CryptoElGamal::decrypt(const std::vector<Mpz>& ciphertext) {
+Mpz CryptoElGamal::decrypt(const std::vector<Mpz>& ciphertext) const {
     //intermediate = c1 ^ (p - 1 - private_key) mod p
     Mpz intermediate = Mpz::powm(ciphertext[0], (p - 1) - a, p);
     //αποκρυπτογράφηση ως intermediate * c2 mod p

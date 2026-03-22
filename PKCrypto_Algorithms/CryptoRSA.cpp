@@ -67,13 +67,13 @@ bool CryptoRSA::e_euclid() {
     return true;
 }
 
-bool CryptoRSA::encrypt(const Mpz& cleartext, std::vector<Mpz>& ciphertext) {
+bool CryptoRSA::encrypt(const Mpz& cleartext, std::vector<Mpz>& ciphertext) const {
     if (cleartext >= n)
         return false;
     ciphertext[0] = Mpz::powm(cleartext, e, n);
     return true;
 }
 
-Mpz CryptoRSA::decrypt(const std::vector<Mpz>& ciphertext) {
+Mpz CryptoRSA::decrypt(const std::vector<Mpz>& ciphertext) const {
     return Mpz::powm(ciphertext[0], d, n);
 }
