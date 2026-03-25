@@ -3,17 +3,16 @@
 #include "Mpz.h"
 #include <vector>
 
-class CryptoElGamal : public CryptoBase
-{
-private:
-	static constexpr size_t key_max_size = 200;
-	gmp::Mpz p, p_sub_2, g, a, public_key;
-public:
-	CryptoElGamal();
-	CryptoElGamal(const gmp::Mpz& p, const gmp::Mpz& a);
-	~CryptoElGamal() = default;
-	void print_parameters() const override;
-	bool encrypt(const gmp::Mpz& cleartext, std::vector<gmp::Mpz>& ciphertext) const override;
-	gmp::Mpz decrypt(const std::vector<gmp::Mpz>& ciphertext) const override;
-};
+class CryptoElGamal : public CryptoBase {
+  private:
+    static constexpr size_t key_max_size = 200;
+    gmp::Mpz p, p_sub_2, g, a, public_key;
 
+  public:
+    CryptoElGamal();
+    CryptoElGamal(const gmp::Mpz& p, const gmp::Mpz& a);
+    ~CryptoElGamal() = default;
+    void print_parameters() const override;
+    bool encrypt(const gmp::Mpz& cleartext, std::vector<gmp::Mpz>& ciphertext) const override;
+    gmp::Mpz decrypt(const std::vector<gmp::Mpz>& ciphertext) const override;
+};

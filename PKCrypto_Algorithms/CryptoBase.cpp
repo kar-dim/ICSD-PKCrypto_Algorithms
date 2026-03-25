@@ -5,20 +5,19 @@
 #include <gmp.h>
 #include <string>
 
-using std::string;
 using gmp::Mpz;
+using gmp::ulong;
+using std::string;
 
 CryptoBase::CryptoBase() {
-    gmp_randinit_default(state); //αρχικοποίηση του random state
+    gmp_randinit_default(state); // αρχικοποίηση του random state
     gmp_randseed_ui(state, static_cast<ulong>(time(NULL)));
 }
 
-CryptoBase::~CryptoBase() {
-    gmp_randclear(state);
-}
+CryptoBase::~CryptoBase() { gmp_randclear(state); }
 
-//συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
-Mpz CryptoBase::english_to_decimal(const string &word) const {
+// συναρτήση για τη κωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
+Mpz CryptoBase::english_to_decimal(const string& word) const {
     Mpz number(0);
     for (unsigned char c : word) {
         number *= 256;
@@ -27,7 +26,7 @@ Mpz CryptoBase::english_to_decimal(const string &word) const {
     return number;
 }
 
-//συναρτήση για τη αποκωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
+// συναρτήση για τη αποκωδικοποίηση ενός αριθμού ως μια λέξη (Base-256)
 string CryptoBase::decimal_to_english(const Mpz& number) {
     Mpz n = number;
     std::string result;
@@ -38,4 +37,3 @@ string CryptoBase::decimal_to_english(const Mpz& number) {
     std::reverse(result.begin(), result.end());
     return result;
 }
-

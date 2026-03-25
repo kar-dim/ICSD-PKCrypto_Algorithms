@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
+using gmp::Mpz;
 using std::cout;
 using std::string;
-using gmp::Mpz;
 
 static int encode(const CryptoBase& crypto, const string& input, Mpz& decimal_value) {
     cout << "Plaintext message = " << input << "\n\n";
@@ -23,17 +23,17 @@ static int encode(const CryptoBase& crypto, const string& input, Mpz& decimal_va
     return 0;
 }
 
-static int encrypt(const CryptoBase &crypto, const Mpz &decimal_value, std::vector<Mpz> &ciphertext) {
+static int encrypt(const CryptoBase& crypto, const Mpz& decimal_value, std::vector<Mpz>& ciphertext) {
     if (!crypto.encrypt(decimal_value, ciphertext)) {
         cout << "Could not encrypt!";
         return -1;
     }
-	for (const auto &cipher : ciphertext)
+    for (const auto& cipher : ciphertext)
         cout << "Encrypted Ciphertext = " << cipher << "\n\n";
     return 0;
 }
 
-static int decrypt(const CryptoBase &crypto, const std::vector<Mpz> &ciphertext, Mpz &decrypted, string &decoded) {
+static int decrypt(const CryptoBase& crypto, const std::vector<Mpz>& ciphertext, Mpz& decrypted, string& decoded) {
     decrypted = crypto.decrypt(ciphertext);
     if (decrypted.is_empty()) {
         cout << "Could not decrypt!";
@@ -49,16 +49,16 @@ static int decrypt(const CryptoBase &crypto, const std::vector<Mpz> &ciphertext,
     return 0;
 }
 
-static int process(const CryptoBase &crypto, const string &input, std::vector<Mpz> &ciphertext) {
+static int process(const CryptoBase& crypto, const string& input, std::vector<Mpz>& ciphertext) {
     crypto.print_parameters();
-    //encode
+    // encode
     Mpz decimal_value;
     if (encode(crypto, input, decimal_value) != 0)
         return -1;
-    //encrypt
+    // encrypt
     if (encrypt(crypto, decimal_value, ciphertext) != 0)
         return -1;
-    //decrypt
+    // decrypt
     Mpz decrypted;
     string decoded;
     if (decrypt(crypto, ciphertext, decrypted, decoded) != 0)
@@ -73,15 +73,14 @@ int main(int argc, char** argv) {
     }
     const string crypto_method(argv[1]);
     const string input(argv[2]);
-	std::vector<Mpz> ciphertext(1);
+    std::vector<Mpz> ciphertext(1);
     std::unique_ptr<CryptoBase> crypto;
     if (crypto_method.compare("rsa") == 0)
         crypto = std::make_unique<CryptoRSA>();
     else if (crypto_method.compare("elgamal") == 0) {
         crypto = std::make_unique<CryptoElGamal>();
-		ciphertext.resize(2); //elgamal έχει 2 ciphertext
-    }
-    else if (crypto_method.compare("rabin") == 0)
+        ciphertext.resize(2); // elgamal έχει 2 ciphertext
+    } else if (crypto_method.compare("rabin") == 0)
         crypto = std::make_unique<CryptoRabin>();
     else {
         cout << "Wrong crypto method. Only 'rsa','elgamal' and 'rabin' allowed";
@@ -89,4 +88,3 @@ int main(int argc, char** argv) {
     }
     return process(*crypto, input, ciphertext);
 }
-
