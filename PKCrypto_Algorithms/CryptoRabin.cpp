@@ -13,7 +13,7 @@ using std::cout;
 using std::string;
 
 const Mpz CryptoRabin::redundancy = Mpz("11111111111");
-const Mpz CryptoRabin::redundancy_factor = Mpz::pow_ui(10, static_cast<ulong>(redundancy.size_in_base(10)));
+const Mpz CryptoRabin::redundancy_factor = Mpz::pow_ui(10, 11);
 
 CryptoRabin::CryptoRabin() : CryptoBase() {
     // ευρεση δυο prime p,q ωστε p==q==3mod4, δηλαδή αν p MOD 4 = q MOD 4 = 3 mod 4 -> p MOD 4 = q MOD 4 = 3

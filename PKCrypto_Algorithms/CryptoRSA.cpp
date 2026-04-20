@@ -48,6 +48,8 @@ bool CryptoRSA::e_euclid() {
 
     // επαναληπτικά μέχρι να μη μπορεί να μειωθεί και άλλο το a
     while (e_copy > 1) {
+        if (totient_copy == 0)
+            return false;
         q = e_copy / totient_copy;
         t = totient_copy;
         totient_copy = e_copy % totient_copy;

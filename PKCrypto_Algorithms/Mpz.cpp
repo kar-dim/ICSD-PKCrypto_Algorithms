@@ -1,4 +1,5 @@
 #include "Mpz.h"
+#include <cstdlib>
 #include <gmp.h>
 #include <ostream>
 #include <string>
@@ -87,7 +88,11 @@ void gmp::Mpz::operator-=(const ulong n) { mpz_sub_ui(this->_value, this->_value
 
 void gmp::Mpz::operator-=(const Mpz& other) { mpz_sub(this->_value, this->_value, other._value); }
 
-Mpz gmp::Mpz::operator-() const { return *this * -1UL; }
+Mpz gmp::Mpz::operator-() const {
+    Mpz mpz;
+    mpz_neg(mpz._value, _value);
+    return mpz;
+}
 
 Mpz Mpz::operator+(const ulong n) const {
     Mpz mpz;
@@ -107,7 +112,7 @@ void Mpz::operator+=(const Mpz& other) { mpz_add(this->_value, this->_value, oth
 
 Mpz Mpz::operator*(const ulong n) const {
     Mpz mpz;
-    mpz_mul_si(mpz._value, this->_value, n);
+    mpz_mul_ui(mpz._value, this->_value, n);
     return mpz;
 }
 
@@ -154,7 +159,9 @@ void gmp::Mpz::operator/=(const ulong n) { mpz_fdiv_q_ui(this->_value, this->_va
 void gmp::Mpz::operator/=(const Mpz& other) { mpz_fdiv_q(this->_value, this->_value, other._value); }
 
 std::ostream& gmp::operator<<(std::ostream& os, const Mpz& mpz) {
-    mpz_out_str(NULL, 10, mpz());
+    char* s = mpz_get_str(nullptr, 10, mpz());
+    os << s;
+    free(s);
     return os;
 }
 

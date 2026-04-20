@@ -11,7 +11,7 @@ CryptoElGamal::CryptoElGamal() : CryptoBase() {
     // p: random prime
     while (true) {
         p = Mpz::urandomb(state, key_max_size);
-        if (Mpz::probab_prime_p(p, 30) >= 1)
+        if (Mpz::probab_prime_p(p, 30) >= 1 && Mpz::probab_prime_p((p - 1) / 2, 30) >= 1)
             break;
     }
     p_sub_2 = p - 2;
